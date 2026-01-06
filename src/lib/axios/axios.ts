@@ -1,9 +1,8 @@
-import axios, { AxiosError, AxiosInstance } from "axios";
-import { API_URL } from "@env";
 import { getToken } from "@/lib/utils/token";
+import axios, { AxiosError, AxiosInstance } from "axios";
 
 const axiosAPI: AxiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
   headers: { "Content-Type": "application/json" },
   timeout: 10000,
 });
