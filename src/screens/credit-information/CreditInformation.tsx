@@ -5,7 +5,7 @@ import { AnimatedHeader } from "@/components/common/Header";
 import { useNavigation } from "@react-navigation/native";
 import { formatNumber } from "@/lib/utils/number";
 import { CreditInformationRouteProp, RootNavigationProp } from "@/lib/types/navigation";
-import { toReadableDate } from "@/lib/utils/date";
+import { formatDate } from "@/lib/utils/date";
 import { TabsProvider, Tab } from "@/components/common/Tabs";
 import { Edit, Plus } from "lucide-react-native";
 import { Portal } from "react-native-paper";
@@ -66,8 +66,8 @@ const CreditInformation = () => {
               style={{ elevation: 5 }}
             >
               <View className="w-full flex-row justify-evenly gap-4">
-                <CardItem label="Credit Date" value={toReadableDate(credit.creditDate)} />
-                <CardItem label="Due Date" value={toReadableDate(credit.dueDate)} />
+                <CardItem label="Credit Date" value={formatDate(new Date(credit.creditDate))} />
+                <CardItem label="Due Date" value={formatDate(new Date(credit.dueDate))} />
               </View>
               <View className="w-full flex-row justify-evenly gap-4">
                 <CardItem label="Principal" value={`AED ${formatNumber(credit.principalAmount)}`} />
@@ -95,7 +95,7 @@ const CreditInformation = () => {
             activeTabStyle={{ backgroundColor: "#cbd5e1" }}
           >
             <Tab label="Settlements">
-              <Settlements settlements={credit.settlements} />
+              <Settlements data={credit.settlements} />
             </Tab>
             <Tab label="History">
               <History history={credit.history} />

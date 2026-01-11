@@ -1,32 +1,45 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, Keyboard, Animated, Pressable } from "react-native";
-import { StringInput, withErrorAndLabel } from "@/components/common/TextField";
-import { SettlementFormType, SettlementSchema } from "@/lib/schema/settlement";
-import { settlementFormFields } from "@/lib/schema/settlement";
-import { useForm, get } from "react-hook-form";
+import { SettlementFormData, SettlementFormType, SettlementSchema } from "@/lib/schema/settlement";
+import { useForm, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toReadableDate } from "@/lib/utils/date";
+import { formatDate } from "@/lib/utils/date";
+import {
+  CurrencyInput,
+  DateInput,
+  withLabel,
+  DEFAULT_FIELD_STYLE,
+} from "@/components/common/Input";
 import Picker from "@/components/common/Picker";
-import { Calendar } from "lucide-react-native";
 
-const LabeledTextInput = withErrorAndLabel<SettlementFormType>(StringInput);
+const LabeledCurrencyInput = withLabel(CurrencyInput<SettlementFormType>);
+const LabeledDateInput = withLabel(DateInput<SettlementFormType>);
 
-const textFieldClassName = "w-full border border-gray-300 rounded-lg";
+interface SettlementFormField {
+  name: Path<SettlementFormType>;
+  label: string;
+}
+
+const settlementFormFields: SettlementFormField[] = [
+  { name: "interestAmount", label: "Interest Amount" },
+  { name: "settlementAmount", label: "Settlement Amount" },
+  { name: "settlementDate", label: "Settlement Date" },
+];
 
 const AddSettlementForm = ({
-  currentIneterestAmount,
+  currentInterestAmount,
   currentDate,
 }: {
-  currentIneterestAmount?: number;
+  currentInterestAmount?: number;
   currentDate: Date;
 }) => {
   const { control, handleSubmit, formState, clearErrors, setError, setValue, getValues, reset } =
     useForm<SettlementFormType>({
       resolver: zodResolver(SettlementSchema),
       defaultValues: {
-        interestAmount: currentIneterestAmount?.toString(),
-        settlementAmount: "2",
-        settlementDate: toReadableDate(currentDate),
+        interestAmount: currentInterestAmount,
+        settlementAmount: 0,
+        settlementDate: currentDate,
       },
       reValidateMode: "onSubmit",
     });
@@ -35,8 +48,9 @@ const AddSettlementForm = ({
   const [settlementDate, setSettlementDate] = useState(currentDate);
   const [pickerVisible, setPickerVisible] = useState(false);
 
-  const onSubmit = () => {
-    console.log("submit");
+  const onSubmit = (formData: SettlementFormData) => {
+    //  const data: SettlementFormTrueData = { settlementAmount:  }
+    console.log(formData);
   };
 
   useEffect(() => {
@@ -72,7 +86,7 @@ const AddSettlementForm = ({
 
   const handleDateSelect = (date: Date) => {
     setSettlementDate(date);
-    setValue("settlementDate", date.toLocaleDateString());
+    setValue("settlementDate", date);
     setPickerVisible(false);
   };
 
@@ -82,30 +96,26 @@ const AddSettlementForm = ({
         <Text className="text-lg ">Settlement</Text>
       </View>
       <View className="w-full p-6 gap-6 items-center justnify-center">
-        {settlementFormFields.map((field, index) => (
-          <LabeledTextInput
-            key={index}
-            name={field.name}
-            label={field.label}
-            editable={field.isEditable}
-            placeholder={field.placeholder}
-            formState={formState}
-            clearErrors={clearErrors}
-            control={control}
-            loading={loading}
-            className={textFieldClassName}
-            keyboardType={field.keyboardType ?? "default"}
-            inputIcon={
-              field.name === "settlementDate"
-                ? {
-                    pressable: true,
-                    icon: <Calendar size={22} color="#6b7280" />,
-                    onIconPress: () => setPickerVisible(true),
-                  }
-                : undefined
-            }
-          />
-        ))}
+        {settlementFormFields.map(({ name, label }) => {
+          const commonProps = {
+            name,
+            control,
+            label,
+            loading,
+            className: DEFAULT_FIELD_STYLE,
+            clearErrors,
+          };
+          return name !== "settlementDate" ? (
+            <LabeledCurrencyInput key={name} {...commonProps} placeholder="0.00" />
+          ) : (
+            <LabeledDateInput
+              key={name}
+              {...commonProps}
+              placeholder={formatDate(currentDate)}
+              onFieldPress={() => setPickerVisible(true)}
+            />
+          );
+        })}
 
         <Pressable
           className="w-full p-4 items-center justify-center  bg-[#303030] rounded-lg"

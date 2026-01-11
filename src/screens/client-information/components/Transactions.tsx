@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, Pressable, RefreshControl } from "react-native";
 import { ICredit } from "@/lib/types/credit";
 import { formatNumber } from "@/lib/utils/number";
-import { toReadableDate } from "@/lib/utils/date";
+import { formatDate } from "@/lib/utils/date";
 import { useNavigation } from "@react-navigation/native";
 import { RootNavigationProp } from "@/lib/types/navigation";
 import { IClient } from "@/lib/types/client";
@@ -43,7 +43,7 @@ const Transactions = ({ client, credits, refreshControl }: TransactionsProps) =>
           onPress={() => handleCardPress(item)}
         >
           <View className="w-full flex-row items-center justify-between p-2">
-            <Text className="font-bold">{toReadableDate(item.creditDate)}</Text>
+            <Text className="font-bold">{formatDate(new Date(item.creditDate))}</Text>
             <Text
               className={`font-bold ${item.balance > 0 ? (now > new Date(item.dueDate) ? "text-red-500" : "text-blue-500") : "text-green-600"}`}
             >

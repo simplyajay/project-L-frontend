@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, FlatList } from "react-native";
 import { ISettlement } from "@/lib/types/credit";
-import { toReadableDate } from "@/lib/utils/date";
+import { formatDate } from "@/lib/utils/date";
 import { formatNumber } from "@/lib/utils/number";
 
-const Settlements = ({ settlements }: { settlements: ISettlement[] }) => {
+const Settlements = ({ data }: { data: ISettlement[] }) => {
+  const [settlements, setSettlements] = useState(data);
   return (
     <View className="flex-1 bg-slate-200 ">
       <View className="flex-row justify-evenly gap-2 py-2 border-b border-gray-300">
@@ -28,7 +29,7 @@ const Settlements = ({ settlements }: { settlements: ISettlement[] }) => {
         renderItem={({ item }) => (
           <View className="flex-row justify-evenly gap-2 py-6 border-b border-gray-300">
             <View className="flex-1 items-center justify-center">
-              <Text className="text-sm">{toReadableDate(item.settlementDate)}</Text>
+              <Text className="text-sm">{formatDate(new Date(item.settlementDate))}</Text>
             </View>
             <View className="flex-1 items-center justify-center">
               <Text className="text-sm">{`AED ${formatNumber(item.settlementAmount)}`}</Text>

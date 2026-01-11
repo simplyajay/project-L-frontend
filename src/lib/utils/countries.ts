@@ -4,6 +4,7 @@ export interface ICountry {
   name: string;
   code: CountryCode;
   dial_code: string;
+  currencyCode?: string;
 }
 
 export const getFlagEmoji = (countryCode: string) => {

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, FlatList } from "react-native";
 import { ICreditHistory } from "@/lib/types/credit";
-import { toReadableDate } from "@/lib/utils/date";
+import { formatDate } from "@/lib/utils/date";
 import { formatNumber } from "@/lib/utils/number";
 
 const History = ({ history }: { history: ICreditHistory[] }) => {
@@ -28,7 +28,7 @@ const History = ({ history }: { history: ICreditHistory[] }) => {
         renderItem={({ item }) => (
           <View className="flex-row justify-evenly gap-2 py-6 border-b border-gray-300">
             <View className="flex-1 items-center justify-center">
-              <Text className="text-sm">{toReadableDate(item.date)}</Text>
+              <Text className="text-sm">{formatDate(item.date)}</Text>
             </View>
             <View className="flex-1 items-center justify-center">
               <Text className="text-sm">{item.type}</Text>

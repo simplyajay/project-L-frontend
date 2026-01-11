@@ -39,24 +39,23 @@ export interface ClientFormData {
   address?: string;
 }
 
-interface ClientFields {
+export interface ClientFields {
   name: Path<ClientFormType>;
   label: string;
   placeholder?: string;
   isPhone?: boolean;
-  optional?: boolean;
 }
 
 export const personalInfoFields: ClientFields[] = [
   { name: "firstname", label: "First Name", placeholder: "John" },
-  { name: "middlename", label: "Middle Name", placeholder: "Dee", optional: true },
-  { name: "nickname", label: "Nickname", placeholder: "Johnny", optional: true },
+  { name: "middlename", label: "Middle Name", placeholder: "Dee ( Optional )" },
+  { name: "nickname", label: "Nickname", placeholder: "Johnny ( Optional )" },
   { name: "lastname", label: "Last Name", placeholder: "Doe" },
 ];
 
 export const contactInfoFields: ClientFields[] = [
-  { name: "email", label: "Email", placeholder: "johndoe@example.com", optional: true },
-  { name: "facebook", label: "Facebook Account", placeholder: "John Doe", optional: true },
-  { name: "address", label: "Address", placeholder: "221B Baker St, London, UK", optional: true },
+  { name: "email", label: "Email", placeholder: "johndoe@example.com" },
+  { name: "facebook", label: "Facebook Account", placeholder: "John Doe" },
+  { name: "address", label: "Address", placeholder: "221B Baker St, London, UK" },
   { name: "phone", label: "Primary Mobile Number", isPhone: true },
 ];

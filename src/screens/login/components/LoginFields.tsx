@@ -34,6 +34,7 @@ const LoginFields = ({ control, formState, clearErrors, loginError, loading }: I
               editable={!loading}
               className={`w-full border rounded-md p-4 ${errors.identifier ? "border-red-400" : "border-gray-400"}`}
               placeholder="Email or username"
+              placeholderTextColor="#9ca3af"
               autoCapitalize="none"
               onChangeText={(text) => {
                 onChange(text);
@@ -58,8 +59,9 @@ const LoginFields = ({ control, formState, clearErrors, loginError, loading }: I
             >
               <TextInput
                 editable={!loading}
-                className={`flex-1 p-4 pr-3`}
+                className={`text-gray-700 flex-1 p-4 pr-3`}
                 placeholder="Password"
+                placeholderTextColor="#9ca3af"
                 autoCapitalize="none"
                 onChangeText={(text) => {
                   onChange(text);

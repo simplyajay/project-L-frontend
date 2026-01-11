@@ -1,5 +1,4 @@
 import React from "react";
-import { View, Text } from "react-native";
 import Modal from "@/components/common/Modal";
 import AddSettlementForm from "../AddSettlementForm";
 
@@ -19,7 +18,7 @@ const AddSettlementModal = ({ isModalVisible, toggle, interestAmount }: IAddSett
       animationInTiming={300}
       animationOutTiming={300}
     >
-      <AddSettlementForm currentDate={dateNow} currentIneterestAmount={interestAmount} />
+      <AddSettlementForm currentDate={dateNow} currentInterestAmount={interestAmount} />
     </Modal>
   );
 };

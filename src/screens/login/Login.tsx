@@ -56,6 +56,7 @@ const Login = () => {
       setLoginError(error);
     }
 
+    //set preffered currency in state here
     setLoading(false);
   };
 
@@ -67,51 +68,53 @@ const Login = () => {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <Pressable className="flex-1 items-center justify-start p-4" onPress={Keyboard.dismiss}>
-        <View className="w-full h-[40%] flex items-center justify-center">
-          <Image
-            style={{ width: 200, height: 200 }}
-            source={require("@/assets/images/project-l.png")}
-            contentFit="contain"
-          />
-        </View>
+      <Pressable className="flex-1" onPress={Keyboard.dismiss}>
+        <View className="flex-1 w-full items-center justify-start bg-white p-4">
+          <View className="w-full h-[40%] flex items-center justify-center">
+            <Image
+              style={{ width: 200, height: 200 }}
+              source={require("@/assets/images/project-l.png")}
+              contentFit="contain"
+            />
+          </View>
 
-        <View className="w-full items-center justify-center gap-8">
-          <LoginFields
-            control={control}
-            formState={formState}
-            clearErrors={clearAllErrors}
-            loginError={loginError}
-            loading={loading}
-          />
+          <View className="w-full items-center justify-center gap-8">
+            <LoginFields
+              control={control}
+              formState={formState}
+              clearErrors={clearAllErrors}
+              loginError={loginError}
+              loading={loading}
+            />
 
-          <Pressable
-            disabled={loading}
-            onPress={handleSubmit(onSubmit)}
-            className="w-full flex items-center min-h-14 justify-center bg-[#303030] p-4 rounded-md"
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#adadad" />
-            ) : (
-              <Text className="text-white">Login</Text>
+            <Pressable
+              disabled={loading}
+              onPress={handleSubmit(onSubmit)}
+              className="w-full flex items-center min-h-14 justify-center bg-[#303030] p-4 rounded-md"
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#adadad" />
+              ) : (
+                <Text className="text-white">Login</Text>
+              )}
+            </Pressable>
+
+            {showTouchId && (
+              <View className="w-full items-center justify-start gap-8 ">
+                <Text className="font-bold">OR</Text>
+                <Pressable
+                  className="gap-4 items-center justify-center"
+                  disabled={loading}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                  }}
+                >
+                  <Fingerprint width={60} height={60} />
+                  <Text className="font-medium text-lg">Login with Touch ID</Text>
+                </Pressable>
+              </View>
             )}
-          </Pressable>
-
-          {showTouchId && (
-            <View className="w-full items-center justify-start gap-8 ">
-              <Text className="font-bold">OR</Text>
-              <Pressable
-                className="gap-4 items-center justify-center"
-                disabled={loading}
-                onPress={() => {
-                  Keyboard.dismiss();
-                }}
-              >
-                <Fingerprint width={60} height={60} />
-                <Text className="font-medium text-lg">Login with Touch ID</Text>
-              </Pressable>
-            </View>
-          )}
+          </View>
         </View>
       </Pressable>
     </KeyboardAwareScrollView>

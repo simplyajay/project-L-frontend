@@ -19,7 +19,7 @@ const RootNavigation = () => {
         <Provider>
           <SnackbarProvider>
             <Stack.Navigator
-              screenOptions={{ animation: "ios_from_right", presentation: "transparentModal" }}
+              screenOptions={{ animation: "ios_from_right", animationDuration: 100 }}
             >
               <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
               <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />

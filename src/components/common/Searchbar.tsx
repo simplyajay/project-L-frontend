@@ -24,6 +24,7 @@ const Searchbar = ({ placeholder, value, setValue, className, style }: ISearchba
       <TextInput
         className={`flex-1 p-3 px-3 text-gray-800`}
         placeholder={placeholder || "Search"}
+        placeholderTextColor="#9ca3af"
         autoCapitalize="none"
         value={value}
         onChangeText={(val) => setValue(val)}

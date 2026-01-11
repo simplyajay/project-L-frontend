@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { View, Text, Pressable } from "react-native";
 import { IClientSummary } from "@/lib/types/client";
-import { toReadableDate } from "@/lib/utils/date";
+import { formatDate } from "@/lib/utils/date";
 import { formatNumber } from "@/lib/utils/number";
 
 interface IClientCard {
@@ -14,7 +14,9 @@ const ClientSummaryCard = ({ client, handlePress }: IClientCard): React.ReactEle
   const fullName = `${client.firstname} ${client.lastname}`;
   const totalBalance = client.totalBalance;
 
-  const dueDate = unsettledCredit?.dueDate ? toReadableDate(unsettledCredit.dueDate) : undefined;
+  const dueDate = unsettledCredit?.dueDate
+    ? formatDate(new Date(unsettledCredit.dueDate))
+    : undefined;
   const now = new Date();
   now.setUTCHours(0, 0, 0, 0);
 
