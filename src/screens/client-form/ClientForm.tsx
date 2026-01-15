@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   PressableProps,
   Keyboard,
 } from "react-native";
-import { TextInput, withLabel } from "@/components/common/Input";
+import { PhoneInput, TextInput, withLabel } from "@/components/common/Input";
 import { Path } from "react-hook-form";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { CircleMinus } from "lucide-react-native";
@@ -23,10 +23,8 @@ import { ICountry } from "@/lib/utils/countries";
 import { DEFAULT_FIELD_STYLE } from "@/components/common/Input";
 import CountryPickerModal from "./components/CountryPickerModal";
 
-const textFieldClassName = "w-full border rounded-lg";
-const phoneContainerClassName = "flex-1 border rounded-lg";
-
 const LabeledTextInput = withLabel(TextInput<ClientFormType>);
+const LabeledPhoneInput = withLabel(PhoneInput<ClientFormType>);
 
 const PhoneAction = (props: PressableProps) => {
   return (
@@ -55,11 +53,14 @@ const ClientForm = () => {
     getValues,
   } = useClientForm({ client });
 
-  const { isDirty } = formState;
+  const { isDirty, errors } = formState;
 
   const [countryModalVisible, setCountryModalVisible] = React.useState(false);
   const [activeField, setActiveField] = React.useState<Path<ClientFormType> | null>(null);
 
+  const scrollViewRef = useRef<KeyboardAwareScrollView>(null);
+  const contentRef = useRef<View>(null);
+  const fieldRefs = useRef<Record<string, View | null>>({});
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const bgColor = scrollY.interpolate({
@@ -67,6 +68,24 @@ const ClientForm = () => {
     outputRange: ["rgba(241,245,249,1)", "rgba(203,213,225,1)"],
     extrapolate: "clamp",
   });
+
+  //scroll to error
+  useEffect(() => {
+    const firstKey = Object.keys(formState.errors)[0];
+    if (!firstKey) return;
+
+    const rootName = firstKey.split(".")[0];
+    const field = fieldRefs.current[rootName];
+    const container = contentRef.current;
+
+    if (!field || !container) return;
+
+    requestAnimationFrame(() => {
+      field.measureLayout(container, (_x, y) => {
+        scrollViewRef.current?.scrollToPosition(0, y - 20, true);
+      });
+    });
+  }, [formState.errors]);
 
   const toggleModal = useCallback(() => {
     setCountryModalVisible((prev) => !prev);
@@ -81,7 +100,6 @@ const ClientForm = () => {
   const handleCountrySelect = useCallback(
     (country: ICountry) => {
       if (activeField) {
-        console.log("zxc");
         setValue(activeField, {
           countryCode: country.code as string,
           value: getValues("phone.value"),
@@ -91,6 +109,43 @@ const ClientForm = () => {
     },
     [activeField]
   );
+
+  const renderFields = (
+    f: (typeof personalInfoFields)[number] | (typeof contactInfoFields)[number],
+    index: number
+  ) => {
+    const commonProps = {
+      name: f.name,
+      label: f.label,
+      control,
+      loading,
+      clearErrors,
+      className: DEFAULT_FIELD_STYLE,
+    };
+
+    return (
+      <View
+        key={f.name}
+        ref={(ref) => {
+          fieldRefs.current[f.name] = ref;
+        }}
+      >
+        {f.isPhone ? (
+          <LabeledPhoneInput
+            key={index}
+            {...commonProps}
+            onButtonPress={(name) => handleCountryButtonPress(name)}
+          />
+        ) : (
+          <LabeledTextInput
+            {...commonProps}
+            key={index}
+            placeholder={client ? "" : f.placeholder}
+          />
+        )}
+      </View>
+    );
+  };
 
   return (
     <View className="flex-1 bg-slate-100">
@@ -114,7 +169,9 @@ const ClientForm = () => {
           )
         }
       />
+
       <KeyboardAwareScrollView
+        ref={scrollViewRef}
         enableOnAndroid
         extraScrollHeight={180} // how much to push up
         keyboardShouldPersistTaps="handled"
@@ -124,76 +181,54 @@ const ClientForm = () => {
           scrollY.setValue(e.nativeEvent.contentOffset.y);
         }}
       >
-        <Pressable
-          className="flex-1 gap-6 p-2 w-full bg-slate-100"
-          onPress={() => Keyboard.dismiss()}
-        >
-          <View className="w-full gap-6 p-2">
-            <Text className="text-lg font-bold">Personal Information</Text>
-            <View className=" gap-6 px-2">
-              {personalInfoFields.map(({ name, ...rest }) => (
-                <LabeledTextInput
-                  key={name}
-                  name={name}
-                  control={control}
-                  loading={loading}
-                  clearErrors={clearErrors}
-                  className={DEFAULT_FIELD_STYLE}
-                  {...rest}
-                />
-              ))}
+        <View ref={contentRef}>
+          <Pressable
+            className="flex-1 gap-6 p-2 w-full bg-slate-100"
+            onPress={() => Keyboard.dismiss()}
+          >
+            <View className="w-full gap-6 p-2">
+              <Text className="text-lg font-bold">Personal Information</Text>
+              <View className=" gap-6 px-2">{personalInfoFields.map(renderFields)}</View>
             </View>
-          </View>
-          <View className="w-full gap-6 p-2">
-            <Text className="text-lg font-bold">Contact Information</Text>
-            <View className="gap-6 px-2">
-              {contactInfoFields.map(({ name, ...rest }) => {
-                return (
-                  <LabeledTextInput
-                    key={name}
-                    name={name}
-                    control={control}
-                    loading={loading}
-                    clearErrors={clearErrors}
-                    className={DEFAULT_FIELD_STYLE}
-                    {...rest}
-                  />
-                );
-              })}
-              {/*
-              
-                        {fields.map((field, index) => (
-                <LabeledPhoneInputWithAction
-                  key={index}
-                  loading={loading}
-                  label={`Additional Phone ${index + 1}`}
-                  name={`otherPhones.${index}` as const}
-                  formState={formState}
-                  clearErrors={clearErrors}
-                  control={control}
-                  onButtonPress={(name) => handleCountryButtonPress(name)}
-                  actionComponent={<PhoneAction onPress={() => remove(index)} />}
-                  className={phoneContainerClassName}
-                />
-              ))}
-              
-              
-              */}
+            <View className="w-full gap-6 p-2">
+              <Text className="text-lg font-bold">Contact Information</Text>
+              <View className="gap-6 px-2">
+                {contactInfoFields.map(renderFields)}
 
-              <Pressable
-                onPress={() => append({ countryCode: "AE", value: "" })} // add a new empty phone object
-                className="flex-row items-start rounded-md"
-              >
-                <Text className="text-amber-600 font-semibold">Add phone number</Text>
-              </Pressable>
+                {fields.map((field, index) => (
+                  <View className="flex-row items-center gap-4" key={index}>
+                    <View className="flex-1">
+                      <LabeledPhoneInput
+                        name={`otherPhones.${index}` as const}
+                        control={control}
+                        loading={loading}
+                        label={`Additional Phone ${index + 1}`}
+                        clearErrors={clearErrors}
+                        className={"border border-gray-300 rounded-lg"}
+                        onButtonPress={handleCountryButtonPress}
+                      />
+                    </View>
+                    <View>
+                      <PhoneAction className="top-3" onPress={() => remove(index)} />
+                    </View>
+                  </View>
+                ))}
+
+                <Pressable
+                  onPress={() => append({ countryCode: "AE", value: "" })} // add a new empty phone object
+                  className="flex-row items-start rounded-md"
+                >
+                  <Text className="text-amber-600 font-semibold">Add phone number</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-          <CountryPickerModal
-            visible={countryModalVisible}
-            toggle={toggleModal}
-            onSelect={handleCountrySelect}
-          />
-        </Pressable>
+            <CountryPickerModal
+              visible={countryModalVisible}
+              toggle={toggleModal}
+              onSelect={handleCountrySelect}
+            />
+          </Pressable>
+        </View>
       </KeyboardAwareScrollView>
     </View>
   );

@@ -3,7 +3,7 @@ import { View, TextInput, Text, Pressable } from "react-native";
 import { Controller } from "react-hook-form";
 import { Eye, EyeOff, X } from "lucide-react-native";
 import { SvgProps, Svg, Path, G } from "react-native-svg";
-import { ILoginField } from "./login";
+import { LoginField } from "./login";
 
 export const Fingerprint: React.FC<SvgProps> = (props) => {
   const { width, height, fill, stroke } = props;
@@ -18,7 +18,7 @@ export const Fingerprint: React.FC<SvgProps> = (props) => {
   );
 };
 
-const LoginFields = ({ control, formState, clearErrors, loginError, loading }: ILoginField) => {
+const LoginFields = ({ control, formState, clearErrors, loginError, loading }: LoginField) => {
   const { errors } = formState;
 
   const [showPassword, setShowPassword] = useState<boolean>(false);

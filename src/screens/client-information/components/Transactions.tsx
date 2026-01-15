@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, Pressable, RefreshControl } from "react-native";
-import { ICredit } from "@/lib/types/credit";
+import { ICreditSnapshot } from "@/lib/types/credit";
 import { formatNumber } from "@/lib/utils/number";
 import { formatDate } from "@/lib/utils/date";
 import { useNavigation } from "@react-navigation/native";
@@ -9,7 +9,7 @@ import { IClient } from "@/lib/types/client";
 
 type TransactionsProps = {
   client: IClient;
-  credits: ICredit[];
+  credits: ICreditSnapshot[];
   refreshControl: {
     handleRefresh: () => void;
     loading: boolean;
@@ -22,8 +22,8 @@ const Transactions = ({ client, credits, refreshControl }: TransactionsProps) =>
 
   const { loading, handleRefresh } = refreshControl;
 
-  const handleCardPress = (credit: ICredit) => {
-    navigation.navigate("CreditInformation", { client, credit });
+  const handleCardPress = (credit: ICreditSnapshot) => {
+    navigation.navigate("CreditInformation", { client, creditId: credit._id });
   };
 
   return (
@@ -60,12 +60,6 @@ const Transactions = ({ client, credits, refreshControl }: TransactionsProps) =>
               <Text className="text-sm text-gray-500">Balance</Text>
               <Text>{`AED ${formatNumber(item.balance)}`}</Text>
             </View>
-            {item.balance > 0 && (
-              <View className="items-end">
-                <Text className="text-sm text-gray-500">Interest</Text>
-                <Text>{`AED ${formatNumber(item.currentInterestAmount)}`}</Text>
-              </View>
-            )}
           </View>
         </Pressable>
       )}

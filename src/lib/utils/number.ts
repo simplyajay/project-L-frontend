@@ -1,7 +1,9 @@
 export const formatNumber = (num: number): string => {
+  const hansMeaningfulDecimals = Math.abs(num % 1) >= 0.01;
+
   return new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: 2,
-    maximumSignificantDigits: 2,
+    minimumFractionDigits: hansMeaningfulDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
   }).format(num);
 };
 

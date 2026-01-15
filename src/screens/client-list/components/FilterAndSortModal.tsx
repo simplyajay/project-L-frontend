@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import Modal from "../../../components/common/Modal";
 import { View, Text, Pressable, FlatList } from "react-native";
 import { Circle, Square, SquareCheck } from "lucide-react-native";
-import { FilterAndSortItems } from "../useFilterAndSort";
+import { FilterAndSortProps } from "../useFilterAndSort";
 
-export interface ISort {
+export type SortProps = {
   type: "sortBy";
   key: "createdAt" | "firstname" | "balance" | "dueDate";
   value: string;
-}
+};
 
-export interface IFilter {
+export interface FilterProps {
   type: "filter";
   key: "overDue" | "notOverDue" | "noCredit";
   value: string;
@@ -18,11 +18,11 @@ export interface IFilter {
 
 interface ISortSettingModal {
   isModalVisible: boolean;
-  data: FilterAndSortItems[];
-  sortSetting: ISort;
-  filterSetting: IFilter[];
+  data: FilterAndSortProps[];
+  sortSetting: SortProps;
+  filterSetting: FilterProps[];
   toggle: () => void;
-  handleSort: (sortBy: ISort, filters: IFilter[]) => void;
+  handleSort: (sortBy: SortProps, filters: FilterProps[]) => void;
 }
 
 const SortSettingModal = ({
@@ -33,8 +33,8 @@ const SortSettingModal = ({
   toggle,
   handleSort,
 }: ISortSettingModal) => {
-  const [sortBy, setSortBy] = useState<ISort>(sortSetting);
-  const [filters, setFilters] = useState<IFilter[]>(filterSetting);
+  const [sortBy, setSortBy] = useState<SortProps>(sortSetting);
+  const [filters, setFilters] = useState<FilterProps[]>(filterSetting);
 
   return (
     <Modal

@@ -18,13 +18,15 @@ export type ISettlement = {
 };
 
 export type ICreditHistory = {
+  _id: string;
   type: "Settlement" | "Adjustment";
   date: Date;
   note: string;
 };
 
-export type ICreditSummary = {
+export type ICreditSnapshot = {
   _id: string;
+  principalAmount: number;
   balance: number;
   creditDate: Date;
   dueDate: Date;

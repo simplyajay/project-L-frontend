@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { View, Text, Pressable } from "react-native";
 import { RootNavigationProp, ClientInformationRouteProp } from "@/lib/types/navigation";
@@ -20,11 +20,9 @@ const ClientInformation = () => {
   const { showMessage } = useSnackbar();
   const { shouldRefresh, setShouldRefresh } = useClientStore();
   const { clientId } = route.params;
-  const { loading, hasError, client, credits, fetchData } = useClientInformation({ clientId });
-
-  const fullName = client?.middlename
-    ? `${client?.firstname} ${client.middlename} ${client.lastname} `
-    : `${client?.firstname} ${client?.lastname}`;
+  const { loading, hasError, client, credits, fetchData, fullName } = useClientInformation({
+    clientId,
+  });
 
   const handleEditPress = () => {
     console.log("sdadsadas", client?.firstname);

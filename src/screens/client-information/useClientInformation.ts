@@ -1,5 +1,5 @@
 import { IClient } from "@/lib/types/client";
-import { ICredit } from "@/lib/types/credit";
+import { ICreditSnapshot } from "@/lib/types/credit";
 import { useState, useEffect, useCallback } from "react";
 import { getClient, getClientCredits } from "@/api/clients";
 
@@ -11,7 +11,7 @@ export const useClientInformation = ({ clientId }: IUseClientInformation) => {
   const [loading, setLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [client, setClient] = useState<IClient>();
-  const [credits, setCredits] = useState<ICredit[]>([]);
+  const [credits, setCredits] = useState<ICreditSnapshot[]>([]);
 
   const fullName = client?.middlename
     ? `${client?.firstname} ${client.middlename} ${client.lastname} `
@@ -23,7 +23,7 @@ export const useClientInformation = ({ clientId }: IUseClientInformation) => {
     try {
       const [clientResponse, creditsResponse] = await Promise.all([
         getClient<IClient>({ id: clientId }),
-        getClientCredits<ICredit[]>({ id: clientId }),
+        getClientCredits<ICreditSnapshot[]>({ id: clientId }),
       ]);
 
       //await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -41,5 +41,5 @@ export const useClientInformation = ({ clientId }: IUseClientInformation) => {
     }
   }, [clientId]);
 
-  return { loading, hasError, client, credits, fetchData };
+  return { loading, hasError, client, credits, fetchData, fullName };
 };

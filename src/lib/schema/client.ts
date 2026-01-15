@@ -48,14 +48,14 @@ export interface ClientFields {
 
 export const personalInfoFields: ClientFields[] = [
   { name: "firstname", label: "First Name", placeholder: "John" },
-  { name: "middlename", label: "Middle Name", placeholder: "Dee ( Optional )" },
-  { name: "nickname", label: "Nickname", placeholder: "Johnny ( Optional )" },
+  { name: "middlename", label: "Middle ( Optional )", placeholder: "Dee" },
+  { name: "nickname", label: "Nickname ( Optional )", placeholder: "Johnny" },
   { name: "lastname", label: "Last Name", placeholder: "Doe" },
 ];
 
 export const contactInfoFields: ClientFields[] = [
-  { name: "email", label: "Email", placeholder: "johndoe@example.com" },
-  { name: "facebook", label: "Facebook Account", placeholder: "John Doe" },
-  { name: "address", label: "Address", placeholder: "221B Baker St, London, UK" },
+  { name: "email", label: "Email ( Optional )", placeholder: "johndoe@example.com" },
+  { name: "facebook", label: "Facebook Account ( Optional )", placeholder: "John Doe" },
+  { name: "address", label: "Address ( Optional )", placeholder: "221B Baker St, London, UK" },
   { name: "phone", label: "Primary Mobile Number", isPhone: true },
 ];

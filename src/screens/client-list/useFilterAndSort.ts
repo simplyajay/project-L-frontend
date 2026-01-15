@@ -1,19 +1,19 @@
 import { useState, useRef } from "react";
-import { ISort, IFilter } from "./components/FilterAndSortModal";
+import { SortProps, FilterProps } from "./components/FilterAndSortModal";
 import { Keyboard } from "react-native";
 import { isEqual } from "lodash";
 
-export type FilterAndSortItems = ISort | IFilter;
+export type FilterAndSortProps = SortProps | FilterProps;
 
-const defaultSort: ISort = { type: "sortBy", key: "createdAt", value: "Created" };
+const defaultSort: SortProps = { type: "sortBy", key: "createdAt", value: "Created" };
 
-const defaultFilters: IFilter[] = [
+const defaultFilters: FilterProps[] = [
   { type: "filter", key: "overDue", value: "Overdue" },
   { type: "filter", key: "notOverDue", value: "Up to date" },
   { type: "filter", key: "noCredit", value: "No Credit" },
 ];
 
-const filterAndSortItems: FilterAndSortItems[] = [
+const filterAndSortItems: FilterAndSortProps[] = [
   { type: "sortBy", key: "createdAt", value: "Created" },
   { type: "sortBy", key: "firstname", value: "Name" },
   { type: "sortBy", key: "balance", value: "Balance" },
@@ -25,8 +25,8 @@ export const useFilterAndSort = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchInput, setSearchInput] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<1 | -1>(1);
-  const [selectedFilters, setSelectedFilters] = useState<IFilter[]>(defaultFilters);
-  const [sortBy, setSortBy] = useState<ISort>(defaultSort);
+  const [selectedFilters, setSelectedFilters] = useState<FilterProps[]>(defaultFilters);
+  const [sortBy, setSortBy] = useState<SortProps>(defaultSort);
 
   const appliedSortRef = useRef(sortBy);
   const appliedFilterRef = useRef(selectedFilters);
@@ -39,7 +39,7 @@ export const useFilterAndSort = () => {
     showModal: () => toggleModal(),
   };
 
-  const handleSort = async (sort: ISort, filters: IFilter[]) => {
+  const handleSort = async (sort: SortProps, filters: FilterProps[]) => {
     const sortChanged = sort.key !== appliedSortRef.current.key;
     const filtersChanged = !isEqual(filters, appliedFilterRef.current);
     if (sortChanged || filtersChanged) {

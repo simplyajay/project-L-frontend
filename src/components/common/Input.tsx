@@ -1,5 +1,5 @@
 import React, { JSX } from "react";
-import { View, TextInput as RNTextInput, Text, Pressable } from "react-native";
+import { View, TextInput as RNTextInput, Text, Pressable, LayoutChangeEvent } from "react-native";
 import {
   get,
   Control,
@@ -8,11 +8,14 @@ import {
   UseFormClearErrors,
   UseControllerProps,
   ControllerRenderProps,
+  Path,
 } from "react-hook-form";
-import { Calendar } from "lucide-react-native";
+import { Calendar, ChevronDown } from "lucide-react-native";
 import { TextInputProps as RNTextInputProps } from "react-native";
 import { MoneyTextInput } from "@alexzunik/react-native-money-input";
-import { formatDate, parseDate } from "@/lib/utils/date";
+import { formatDate } from "@/lib/utils/date";
+import { CountryCode, getCountryCallingCode } from "libphonenumber-js";
+import { getFlagEmoji } from "@/lib/utils/countries";
 
 export const DEFAULT_FIELD_STYLE = "w-full border border-gray-300 rounded-lg";
 const INNER_FIELD_STYLE = "items-center w-full flex-row";
@@ -89,7 +92,10 @@ export const TextInput = <T extends FieldValues>(
     inputIcon,
     keyboardType,
     secureTextEntry,
+    onLayout,
+    ...rest
   } = props;
+
   return (
     <InputWrapper name={name} control={control}>
       {({ field, fieldError }) => {
@@ -111,6 +117,7 @@ export const TextInput = <T extends FieldValues>(
               }}
               onFocus={() => clearErrors(field.name)}
               value={field.value}
+              {...rest}
             />
             {inputIcon && (
               <Pressable
@@ -128,7 +135,17 @@ export const TextInput = <T extends FieldValues>(
 };
 
 export const CurrencyInput = <T extends FieldValues>(props: InputProps<T>) => {
-  const { name, control, loading, editable, placeholder, clearErrors, className } = props;
+  const {
+    name,
+    control,
+    loading,
+    editable,
+    placeholder,
+    clearErrors,
+    className,
+    onLayout,
+    ...rest
+  } = props;
   return (
     <InputWrapper name={name} control={control}>
       {({ field, fieldError }) => (
@@ -150,6 +167,7 @@ export const CurrencyInput = <T extends FieldValues>(props: InputProps<T>) => {
               field.onChange(extracted ? parseFloat(extracted) : "");
             }}
             onFocus={() => clearErrors(field.name)}
+            {...rest}
           />
           <View className="flex-row max-w-12 max-h-11 right-4 items-center">
             <Text className="text-gray-700">AED</Text>
@@ -173,6 +191,8 @@ export const DateInput = <T extends FieldValues>(
     clearErrors,
     className,
     onFieldPress,
+    onLayout,
+    ...rest
   } = props;
 
   return (
@@ -192,6 +212,7 @@ export const DateInput = <T extends FieldValues>(
               autoCapitalize="none"
               onFocus={() => clearErrors(field.name)}
               value={formatDate(field.value) ?? ""}
+              {...rest}
             />
 
             <View className="flex-row max-w-12 max-h-11 right-4 items-center">
@@ -204,11 +225,72 @@ export const DateInput = <T extends FieldValues>(
   );
 };
 
-export const withLabel = <P extends object>(Component: React.ComponentType<P>) => {
-  return (props: P & { label: string }) => (
-    <View className="w-full items-start justify-start gap-1">
-      <Text className="text-sm text-gray-500 font-bold">{props.label}</Text>
-      <Component {...props} />
-    </View>
+export const PhoneInput = <T extends FieldValues>(
+  props: InputProps<T> & { onButtonPress: (name: Path<T>) => void }
+) => {
+  const {
+    name,
+    control,
+    loading,
+    editable,
+    placeholder,
+    clearErrors,
+    className,
+    onButtonPress,
+    onLayout,
+    ...rest
+  } = props;
+
+  return (
+    <InputWrapper name={name} control={control}>
+      {({ field: { name, onChange, value }, fieldError }) => {
+        const val = value || { value: "", countryCode: "AE" as CountryCode };
+
+        return (
+          <View
+            className={`${INNER_FIELD_STYLE} ${fieldError ? "border-red-400" : "border-slate-300"} ${className}`}
+          >
+            <Pressable
+              className="flex-row items-center justify-center px-3 gap-2 border-r border-gray-300"
+              onPress={() => (onButtonPress ? onButtonPress(name) : undefined)}
+            >
+              <View className="flex-row gap-2 items-center">
+                <Text className="">{getFlagEmoji(val.countryCode)}</Text>
+                <Text className="text-gray-700">{`+${getCountryCallingCode(val.countryCode)}`}</Text>
+              </View>
+
+              <ChevronDown size={15} color="#9ca3af" />
+            </Pressable>
+
+            <RNTextInput
+              keyboardType="phone-pad"
+              placeholderTextColor="#9ca3af"
+              editable={loading ? false : (editable ?? true)}
+              className={`flex-1 p-3 text-gray-700 `}
+              placeholder={placeholder}
+              autoCapitalize="none"
+              onChangeText={(text) => {
+                clearErrors(name);
+                onChange({ ...val, value: text });
+              }}
+              onFocus={() => clearErrors(name)}
+              value={val.value}
+              {...rest}
+            />
+          </View>
+        );
+      }}
+    </InputWrapper>
   );
+};
+
+export const withLabel = <P extends object>(Component: React.ComponentType<P>) => {
+  return (props: P & { label: string; onLayout?: (event: LayoutChangeEvent) => void }) => {
+    return (
+      <View className="w-full items-start justify-start gap-1">
+        <Text className="text-sm text-gray-500 font-bold">{props.label}</Text>
+        <Component {...props} />
+      </View>
+    );
+  };
 };

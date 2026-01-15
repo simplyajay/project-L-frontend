@@ -1,15 +1,15 @@
 import { IClientSummary } from "@/lib/types/client";
-import { IFilter } from "./components/FilterAndSortModal";
+import { FilterProps } from "./components/FilterAndSortModal";
 
 interface IApplyFilterAndSort {
   data: IClientSummary[];
   search?: string;
-  filter: IFilter[];
+  filter: FilterProps[];
   sortBy: string;
   direction: 1 | -1;
 }
 
-const filterMap: Record<IFilter["key"], (d: IClientSummary) => boolean> = {
+const filterMap: Record<FilterProps["key"], (d: IClientSummary) => boolean> = {
   noCredit: (d) => {
     const balance = d.unsettledCredit?.balance ?? 0;
     return balance <= 0;

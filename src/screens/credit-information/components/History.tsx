@@ -20,7 +20,7 @@ const History = ({ history }: { history: ICreditHistory[] }) => {
       </View>
       <FlatList
         data={history}
-        keyExtractor={(item, index) => `${item.date}-${index}`}
+        keyExtractor={(item) => item._id}
         contentContainerStyle={{
           flexGrow: 1,
         }}
@@ -28,7 +28,7 @@ const History = ({ history }: { history: ICreditHistory[] }) => {
         renderItem={({ item }) => (
           <View className="flex-row justify-evenly gap-2 py-6 border-b border-gray-300">
             <View className="flex-1 items-center justify-center">
-              <Text className="text-sm">{formatDate(item.date)}</Text>
+              <Text className="text-sm">{formatDate(new Date(item.date))}</Text>
             </View>
             <View className="flex-1 items-center justify-center">
               <Text className="text-sm">{item.type}</Text>

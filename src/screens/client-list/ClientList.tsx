@@ -44,7 +44,6 @@ const ClientList = () => {
 
   const handleAddClientPress = useCallback(() => {
     navigation.push("ClientForm");
-    console.log("zc");
   }, []);
 
   const handleAddCreditPress = useCallback(() => {

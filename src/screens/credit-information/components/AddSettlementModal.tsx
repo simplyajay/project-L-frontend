@@ -5,10 +5,18 @@ import AddSettlementForm from "../AddSettlementForm";
 interface IAddSettlementModal {
   isModalVisible: boolean;
   toggle: () => void;
+  submitCallback?: () => void;
+  creditId: string;
   interestAmount?: number;
 }
 
-const AddSettlementModal = ({ isModalVisible, toggle, interestAmount }: IAddSettlementModal) => {
+const AddSettlementModal = ({
+  isModalVisible,
+  toggle,
+  interestAmount,
+  submitCallback,
+  creditId,
+}: IAddSettlementModal) => {
   const dateNow = new Date(Date.now());
   return (
     <Modal
@@ -18,7 +26,12 @@ const AddSettlementModal = ({ isModalVisible, toggle, interestAmount }: IAddSett
       animationInTiming={300}
       animationOutTiming={300}
     >
-      <AddSettlementForm currentDate={dateNow} currentInterestAmount={interestAmount} />
+      <AddSettlementForm
+        currentDate={dateNow}
+        currentInterestAmount={interestAmount}
+        submitCallback={submitCallback}
+        creditId={creditId}
+      />
     </Modal>
   );
 };

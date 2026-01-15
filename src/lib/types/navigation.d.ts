@@ -9,7 +9,7 @@ export type RootStackParams = {
   Account: undefined;
   ClientInformation: { clientId: string };
   ClientForm?: { client?: IClient };
-  CreditInformation: { client: IClient; credit: ICredit };
+  CreditInformation: { client: IClient; creditId: string };
   CreditForm?: { client?: IClient; credit: ICredit };
 };
 

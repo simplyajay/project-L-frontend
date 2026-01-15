@@ -6,10 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { LoginSchema, LoginForm } from "@/lib/schema/login";
-import { IUser } from "@/lib/types/user";
+import { User } from "@/lib/types/user";
 import { RootNavigationProp } from "@/lib/types/navigation";
 import { saveToken } from "@/lib/utils/token";
-import { ILoginError } from "./components/login";
+import { LoginError } from "./components/login";
 import { authenticateLogin } from "@/api/auth";
 import { Fingerprint } from "lucide-react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -26,7 +26,7 @@ const Login = () => {
 
   const { user, setUser } = useAuthStore();
   const [loading, setLoading] = useState<boolean>(false);
-  const [loginError, setLoginError] = useState<ILoginError>();
+  const [loginError, setLoginError] = useState<LoginError>();
   const [showTouchId, setShowTouchId] = useState<boolean>(false);
 
   const clearAllErrors = (target?: "identifier" | "loginPassword"): void => {
@@ -37,7 +37,7 @@ const Login = () => {
   const onSubmit = async (data: LoginForm): Promise<void> => {
     setLoading(true);
     setLoginError(undefined);
-    const response = await authenticateLogin<{ accessToken: string; user: IUser }>({
+    const response = await authenticateLogin<{ accessToken: string; user: User }>({
       payload: data,
     });
 

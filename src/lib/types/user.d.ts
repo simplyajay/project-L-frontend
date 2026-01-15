@@ -1,4 +1,4 @@
-export interface IUser {
+export type User = {
   _id: string;
   username: string;
   firstname: string;
@@ -9,4 +9,4 @@ export interface IUser {
   phone: string;
   createdAt?: Date;
   updatedAt?: Date;
-}
+};

@@ -43,7 +43,7 @@ export const getClientCredits = async <T = ICredit[]>({
   config,
 }: GetClientProps): Promise<APIResponse<T>> => {
   return await handleAPIRequest<T>(
-    axiosAPI.get<T>(`api/clients/${id}/credits`, { requiresAuth: true, ...config })
+    axiosAPI.get<T>(`api/clients/${id}/credit-snapshots`, { requiresAuth: true, ...config })
   );
 };
 

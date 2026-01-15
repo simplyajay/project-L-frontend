@@ -1,16 +1,16 @@
 import { Control, FormState } from "react-hook-form";
 import { LoginForm } from "@/lib/schema/login";
-export interface ILoginError {
+export type LoginError = {
   status: number;
   code: string;
   message: string;
   keyValue?: Record<string, any>;
-}
+};
 
-export interface ILoginField {
+export type LoginField = {
   control: Control<LoginForm>;
   formState: FormState<LoginForm>;
   clearErrors: (target?: "identifier" | "loginPassword") => void;
-  loginError?: ILoginError;
+  loginError?: LoginError;
   loading: boolean;
-}
+};

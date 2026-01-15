@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Keyboard, Animated, Pressable } from "react-native";
+import { View, Text, Keyboard, Animated, Pressable, ActivityIndicator } from "react-native";
 import { SettlementFormData, SettlementFormType, SettlementSchema } from "@/lib/schema/settlement";
 import { useForm, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,8 +10,8 @@ import {
   withLabel,
   DEFAULT_FIELD_STYLE,
 } from "@/components/common/Input";
+import { addSettlement } from "@/api/credits";
 import Picker from "@/components/common/Picker";
-
 const LabeledCurrencyInput = withLabel(CurrencyInput<SettlementFormType>);
 const LabeledDateInput = withLabel(DateInput<SettlementFormType>);
 
@@ -29,9 +29,13 @@ const settlementFormFields: SettlementFormField[] = [
 const AddSettlementForm = ({
   currentInterestAmount,
   currentDate,
+  submitCallback,
+  creditId,
 }: {
   currentInterestAmount?: number;
   currentDate: Date;
+  submitCallback?: () => void;
+  creditId: string;
 }) => {
   const { control, handleSubmit, formState, clearErrors, setError, setValue, getValues, reset } =
     useForm<SettlementFormType>({
@@ -48,14 +52,22 @@ const AddSettlementForm = ({
   const [settlementDate, setSettlementDate] = useState(currentDate);
   const [pickerVisible, setPickerVisible] = useState(false);
 
-  const onSubmit = (formData: SettlementFormData) => {
-    //  const data: SettlementFormTrueData = { settlementAmount:  }
-    console.log(formData);
-  };
+  const onSubmit = async (formData: SettlementFormData): Promise<void> => {
+    setLoading(true);
 
-  useEffect(() => {
-    // console.log(pickerVisible);
-  }, [pickerVisible]);
+    const response = await addSettlement({ id: creditId, data: formData });
+
+    if (response.ok) {
+      if (submitCallback) submitCallback();
+
+      console.log(response.payload);
+    } else {
+      const { code, message } = response;
+      console.error(code, ": ", message);
+    }
+
+    setLoading(false);
+  };
 
   const animatedPadding = useRef(new Animated.Value(0)).current;
 
@@ -121,7 +133,11 @@ const AddSettlementForm = ({
           className="w-full p-4 items-center justify-center  bg-[#303030] rounded-lg"
           onPress={handleSubmit(onSubmit)}
         >
-          <Text className="text-white">Add Settlement</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#adadad" />
+          ) : (
+            <Text className="text-white">Add Settlement</Text>
+          )}
         </Pressable>
       </View>
 

@@ -12,6 +12,7 @@ import { registerClient, updateClient } from "@/api/clients";
 import { useNavigation } from "@react-navigation/native";
 import { RootNavigationProp } from "@/lib/types/navigation";
 import { useClientStore } from "@/store/useClientStore";
+import { Keyboard } from "react-native";
 
 interface UseClientForm {
   client?: IClient;
@@ -63,6 +64,7 @@ export const useClientForm = ({ client }: UseClientForm) => {
   };
 
   const onSubmit = async (data: ClientFormType) => {
+    Keyboard.dismiss();
     setLoading(true);
 
     if (!user) throw new Error("Undefined user");

@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, Pressable, Keyboard } from "react-native";
-import { useIsFocused, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { AnimatedHeader } from "@/components/common/Header";
 import { useNavigation } from "@react-navigation/native";
 import { formatNumber } from "@/lib/utils/number";
@@ -12,6 +12,8 @@ import { Portal } from "react-native-paper";
 import Settlements from "./components/Settlements";
 import History from "./components/History";
 import AddSettlementModal from "./components/AddSettlementModal";
+import { useCreditInformation } from "./useCreditInformation";
+import CreditInformationSkeleton from "@/components/skeleton/CreditInformationSkeleton";
 
 const CardItem = ({ label, value }: { label: string; value: any }) => {
   return (
@@ -25,14 +27,18 @@ const CardItem = ({ label, value }: { label: string; value: any }) => {
 const CreditInformation = () => {
   const route = useRoute<CreditInformationRouteProp>();
   const navigation = useNavigation<RootNavigationProp>();
-  const screenFocused = useIsFocused();
 
   const [addSettlementVisible, setAddSettlementVisible] = useState(false);
   const [updateCreditVisible, setUpdateCreditVisible] = useState(false);
 
-  const { credit, client } = route.params;
+  const { creditId, client } = route.params;
+  const { credit, loading, fetchCredit } = useCreditInformation(creditId);
 
-  const handleAddSettlement = useCallback(() => {
+  useEffect(() => {
+    fetchCredit();
+  }, []);
+
+  const toggleModal = useCallback(() => {
     setAddSettlementVisible((prev) => {
       Keyboard.dismiss();
       return !prev;
@@ -43,9 +49,21 @@ const CreditInformation = () => {
     ? `${client.firstname} ${client.middlename} ${client.lastname}`
     : `${client.firstname} ${client.lastname}`;
 
+  if (loading) {
+    return <CreditInformationSkeleton />;
+  }
+
+  if (!credit) {
+    return (
+      <View>
+        <Text>Credit fetch error</Text>
+      </View>
+    );
+  }
+
   return (
     <Portal.Host>
-      <View className="flex-1 bg-white">
+      <View className="flex-1 ">
         <AnimatedHeader
           containerStyle={{ backgroundColor: "#f1f5f9" }}
           title={fullname}
@@ -81,10 +99,7 @@ const CreditInformation = () => {
                 <CardItem label="Interest Rate" value={`${credit.interestRate}%`} />
               </View>
             </View>
-            <Pressable
-              className="flex-row self-start items-center p-2 gap-2"
-              onPress={handleAddSettlement}
-            >
+            <Pressable className="flex-row self-start items-center p-2 gap-2" onPress={toggleModal}>
               <Plus size={24} />
               <Text>Add New Settlement</Text>
             </Pressable>
@@ -104,7 +119,12 @@ const CreditInformation = () => {
           <AddSettlementModal
             interestAmount={credit.currentInterestAmount}
             isModalVisible={addSettlementVisible}
-            toggle={handleAddSettlement}
+            toggle={toggleModal}
+            submitCallback={() => {
+              fetchCredit();
+              toggleModal();
+            }}
+            creditId={creditId}
           />
         </View>
       </View>
