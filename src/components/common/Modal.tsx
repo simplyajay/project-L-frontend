@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, PropsWithChildren, ReactNode } from "react";
 import {
   View,
   Pressable,
@@ -7,6 +7,8 @@ import {
   StyleProp,
   ViewStyle,
   Dimensions,
+  Keyboard,
+  Animated as RNAnimated,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -16,7 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Portal } from "react-native-paper";
 
-interface IModal {
+type ModalProps = {
   visible: boolean;
   onBackdropPress?: () => void;
   onBackButtonPress?: () => void;
@@ -27,9 +29,9 @@ interface IModal {
   containerStyle?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
   isCentered?: boolean;
-}
+};
 
-export default function Modal(props: IModal) {
+const Modal = (props: ModalProps) => {
   const {
     visible,
     onBackButtonPress,
@@ -102,7 +104,7 @@ export default function Modal(props: IModal) {
       </View>
     </Portal>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -130,3 +132,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+
+/** Form that will be wrapped with Modal */
+export const AnimatedPadding = ({ children }: { children: ReactNode }) => {
+  const animatedPadding = useRef(new RNAnimated.Value(0)).current;
+
+  useEffect(() => {
+    const showListener = Keyboard.addListener("keyboardDidShow", (e) => {
+      RNAnimated.timing(animatedPadding, {
+        toValue: e.endCoordinates.height,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    const hideListener = Keyboard.addListener("keyboardDidHide", () => {
+      RNAnimated.timing(animatedPadding, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: false,
+      }).start();
+    });
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, [animatedPadding]);
+
+  const animatedStyle = { paddingBottom: animatedPadding };
+
+  return (
+    <RNAnimated.View className="w-full bg-slate-200 rounded-t-lg" style={animatedStyle}>
+      {children}
+    </RNAnimated.View>
+  );
+};
+
+export default Modal;

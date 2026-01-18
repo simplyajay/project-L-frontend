@@ -7,5 +7,3 @@ export const SettlementSchema = z.object({
 });
 
 export type SettlementFormType = z.infer<typeof SettlementSchema>;
-
-export interface SettlementFormData extends SettlementFormType {}

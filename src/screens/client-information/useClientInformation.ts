@@ -1,6 +1,6 @@
 import { IClient } from "@/lib/types/client";
-import { ICreditSnapshot } from "@/lib/types/credit";
-import { useState, useEffect, useCallback } from "react";
+import { CreditSnapshotType } from "@/lib/types/credit";
+import { useState, useCallback } from "react";
 import { getClient, getClientCredits } from "@/api/clients";
 
 interface IUseClientInformation {
@@ -11,7 +11,7 @@ export const useClientInformation = ({ clientId }: IUseClientInformation) => {
   const [loading, setLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [client, setClient] = useState<IClient>();
-  const [credits, setCredits] = useState<ICreditSnapshot[]>([]);
+  const [credits, setCredits] = useState<CreditSnapshotType[]>([]);
 
   const fullName = client?.middlename
     ? `${client?.firstname} ${client.middlename} ${client.lastname} `
@@ -23,7 +23,7 @@ export const useClientInformation = ({ clientId }: IUseClientInformation) => {
     try {
       const [clientResponse, creditsResponse] = await Promise.all([
         getClient<IClient>({ id: clientId }),
-        getClientCredits<ICreditSnapshot[]>({ id: clientId }),
+        getClientCredits<CreditSnapshotType[]>({ id: clientId }),
       ]);
 
       //await new Promise((resolve) => setTimeout(resolve, 2000));

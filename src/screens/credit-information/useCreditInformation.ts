@@ -1,16 +1,12 @@
 import { useState } from "react";
-import { ICredit, ISettlement } from "@/lib/types/credit";
-import { getCredit, addSettlement } from "@/api/credits";
+import { CreditType } from "@/lib/types/credit";
+import { getCredit } from "@/api/credits";
 
-interface IUseCreditInformation {
-  creditId: string;
-}
 export const useCreditInformation = (creditId: string) => {
-  const [credit, setCredit] = useState<ICredit>();
+  const [credit, setCredit] = useState<CreditType>();
   const [loading, setLoading] = useState(false);
 
   const fetchCredit = async () => {
-    //after adding, navigate back to
     setLoading(true);
 
     const response = await getCredit({ id: creditId });

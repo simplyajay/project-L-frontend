@@ -6,13 +6,14 @@ import { useNavigation } from "@react-navigation/native";
 import { formatNumber } from "@/lib/utils/number";
 import { CreditInformationRouteProp, RootNavigationProp } from "@/lib/types/navigation";
 import { formatDate } from "@/lib/utils/date";
-import { TabsProvider, Tab } from "@/components/common/Tabs";
+import { TabsProvider, Tab, DEFAULT_ACTIVE_TAB_STYLE } from "@/components/common/Tabs";
 import { Edit, Plus } from "lucide-react-native";
 import { Portal } from "react-native-paper";
-import Settlements from "./components/Settlements";
-import History from "./components/History";
-import AddSettlementModal from "./components/AddSettlementModal";
 import { useCreditInformation } from "./useCreditInformation";
+import Modal, { AnimatedPadding } from "@/components/common/Modal";
+import History from "./components/History";
+import Settlements from "./components/Settlements";
+import AddSettlementForm from "./components/AddSettlementForm";
 import CreditInformationSkeleton from "@/components/skeleton/CreditInformationSkeleton";
 
 const CardItem = ({ label, value }: { label: string; value: any }) => {
@@ -24,12 +25,19 @@ const CardItem = ({ label, value }: { label: string; value: any }) => {
   );
 };
 
+type ModalOptions = {
+  visible: boolean;
+  type: "settlementForm" | "creditForm";
+};
+
 const CreditInformation = () => {
   const route = useRoute<CreditInformationRouteProp>();
   const navigation = useNavigation<RootNavigationProp>();
 
-  const [addSettlementVisible, setAddSettlementVisible] = useState(false);
-  const [updateCreditVisible, setUpdateCreditVisible] = useState(false);
+  const [modalOptions, setModalOptions] = useState<ModalOptions>({
+    visible: false,
+    type: "settlementForm",
+  });
 
   const { creditId, client } = route.params;
   const { credit, loading, fetchCredit } = useCreditInformation(creditId);
@@ -38,11 +46,9 @@ const CreditInformation = () => {
     fetchCredit();
   }, []);
 
-  const toggleModal = useCallback(() => {
-    setAddSettlementVisible((prev) => {
-      Keyboard.dismiss();
-      return !prev;
-    });
+  const hideModal = useCallback(() => {
+    setModalOptions((prev) => ({ ...prev, visible: false }));
+    Keyboard.dismiss();
   }, []);
 
   const fullname = client.middlename
@@ -61,6 +67,8 @@ const CreditInformation = () => {
     );
   }
 
+  const isPaid = credit.balance > 0;
+
   return (
     <Portal.Host>
       <View className="flex-1 ">
@@ -71,7 +79,7 @@ const CreditInformation = () => {
           actionComponent={
             <Pressable
               className="w-10 p-1 items-center rounded-lg"
-              onPress={() => console.log("edit clicked")}
+              onPress={() => setModalOptions(() => ({ visible: true, type: "creditForm" }))}
             >
               <Edit size={20} />
             </Pressable>
@@ -99,15 +107,22 @@ const CreditInformation = () => {
                 <CardItem label="Interest Rate" value={`${credit.interestRate}%`} />
               </View>
             </View>
-            <Pressable className="flex-row self-start items-center p-2 gap-2" onPress={toggleModal}>
-              <Plus size={24} />
-              <Text>Add New Settlement</Text>
-            </Pressable>
+            {isPaid && (
+              <Pressable
+                className="flex-row self-start items-center p-2 gap-2"
+                onPress={() => setModalOptions(() => ({ visible: true, type: "settlementForm" }))}
+              >
+                <Plus size={24} />
+                <Text>Add New Settlement</Text>
+              </Pressable>
+            )}
           </View>
+
           <TabsProvider
             tabStyle={{ gap: 16, padding: 16 }}
             tabButtonStyle={{ borderRadius: 20, padding: 8 }}
             activeTabStyle={{ backgroundColor: "#cbd5e1" }}
+            activeTabTextStyle={DEFAULT_ACTIVE_TAB_STYLE}
           >
             <Tab label="Settlements">
               <Settlements data={credit.settlements} />
@@ -116,16 +131,31 @@ const CreditInformation = () => {
               <History history={credit.history} />
             </Tab>
           </TabsProvider>
-          <AddSettlementModal
-            interestAmount={credit.currentInterestAmount}
-            isModalVisible={addSettlementVisible}
-            toggle={toggleModal}
-            submitCallback={() => {
-              fetchCredit();
-              toggleModal();
-            }}
-            creditId={creditId}
-          />
+
+          <Modal
+            visible={modalOptions.visible}
+            onBackdropPress={hideModal}
+            onBackButtonPress={hideModal}
+            animationInTiming={300}
+            animationOutTiming={300}
+          >
+            <AnimatedPadding>
+              {modalOptions.type === "settlementForm" ? (
+                <AddSettlementForm
+                  currentInterestAmount={credit.currentInterestAmount}
+                  submitCallback={() => {
+                    fetchCredit();
+                    hideModal();
+                  }}
+                  credit={credit}
+                />
+              ) : (
+                <View>
+                  <Text>Credit Form</Text>
+                </View>
+              )}
+            </AnimatedPadding>
+          </Modal>
         </View>
       </View>
     </Portal.Host>

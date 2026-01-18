@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, FlatList } from "react-native";
-import { ICreditHistory } from "@/lib/types/credit";
+import { HistoryType } from "@/lib/types/credit";
 import { formatDate } from "@/lib/utils/date";
 import { formatNumber } from "@/lib/utils/number";
 
-const History = ({ history }: { history: ICreditHistory[] }) => {
+const History = ({ history }: { history: HistoryType[] }) => {
   return (
     <View className="flex-1 bg-slate-200 ">
       <View className="flex-row justify-evenly gap-2 py-2 border-b border-gray-300">

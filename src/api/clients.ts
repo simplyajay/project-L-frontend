@@ -3,7 +3,7 @@ import { APIResponse, handleAPIRequest } from "@/lib/services/api.service";
 import { IClient, IClientSummary } from "@/lib/types/client";
 import { AxiosRequestConfig } from "axios";
 import { ClientFormData } from "@/lib/schema/client";
-import { ICredit } from "@/lib/types/credit";
+import { CreditType } from "@/lib/types/credit";
 
 export type GetSummarizedClients = {
   summarizedClients: IClientSummary[];
@@ -22,10 +22,10 @@ interface ClientFormProps {
 }
 
 export const getSummarizedClients = async <T = GetSummarizedClients>(
-  config: AxiosRequestConfig = {}
+  config: AxiosRequestConfig = {},
 ): Promise<APIResponse<T>> => {
   return await handleAPIRequest<T>(
-    axiosAPI.get<T>("api/users/me/clients", { requiresAuth: true, ...config })
+    axiosAPI.get<T>("api/users/me/clients", { requiresAuth: true, ...config }),
   );
 };
 
@@ -34,16 +34,16 @@ export const getClient = async <T = IClient>({
   config = {},
 }: GetClientProps): Promise<APIResponse<T>> => {
   return await handleAPIRequest<T>(
-    axiosAPI.get<T>(`api/clients/${id}`, { requiresAuth: true, ...config })
+    axiosAPI.get<T>(`api/clients/${id}`, { requiresAuth: true, ...config }),
   );
 };
 
-export const getClientCredits = async <T = ICredit[]>({
+export const getClientCredits = async <T = CreditType[]>({
   id,
   config,
 }: GetClientProps): Promise<APIResponse<T>> => {
   return await handleAPIRequest<T>(
-    axiosAPI.get<T>(`api/clients/${id}/credit-snapshots`, { requiresAuth: true, ...config })
+    axiosAPI.get<T>(`api/clients/${id}/credit-snapshots`, { requiresAuth: true, ...config }),
   );
 };
 
@@ -52,7 +52,7 @@ export const registerClient = async <T = ClientFormData>({
   config = {},
 }: ClientFormProps): Promise<APIResponse<T>> => {
   return await handleAPIRequest<T>(
-    axiosAPI.post<T>("api/clients/register", data, { requiresAuth: true, ...config })
+    axiosAPI.post<T>("api/clients/register", data, { requiresAuth: true, ...config }),
   );
 };
 
@@ -62,6 +62,6 @@ export const updateClient = async <T = ClientFormData>({
   config = {},
 }: ClientFormProps & { id: string }) => {
   return await handleAPIRequest<T>(
-    axiosAPI.patch<T>(`api/clients/${id}`, data, { requiresAuth: true, ...config })
+    axiosAPI.patch<T>(`api/clients/${id}`, data, { requiresAuth: true, ...config }),
   );
 };

@@ -1,4 +1,4 @@
-import React, { JSX } from "react";
+import React, { JSX, ReactNode } from "react";
 import { View, TextInput as RNTextInput, Text, Pressable, LayoutChangeEvent } from "react-native";
 import {
   get,
@@ -38,6 +38,7 @@ interface InputWrapperProps<T extends FieldValues>
   children: (props: { field: ControllerRenderProps<T>; fieldError: any }) => JSX.Element;
 }
 
+//TextInputProp's defaultValue is omitted because we need the UseControllerProp's defaultValue and they have different types
 export interface InputProps<T extends FieldValues>
   extends Omit<InputWrapperProps<T>, "children">,
     Omit<RNTextInputProps, "defaultValue" | "children"> {
@@ -134,7 +135,9 @@ export const TextInput = <T extends FieldValues>(
   );
 };
 
-export const CurrencyInput = <T extends FieldValues>(props: InputProps<T>) => {
+export const CurrencyInput = <T extends FieldValues>(
+  props: InputProps<T> & { icon?: ReactNode; maxValue?: number }
+) => {
   const {
     name,
     control,
@@ -144,6 +147,8 @@ export const CurrencyInput = <T extends FieldValues>(props: InputProps<T>) => {
     clearErrors,
     className,
     onLayout,
+    icon,
+    maxValue,
     ...rest
   } = props;
   return (
@@ -158,7 +163,7 @@ export const CurrencyInput = <T extends FieldValues>(props: InputProps<T>) => {
             groupingSeparator=","
             keyboardType="numeric"
             placeholder={placeholder}
-            className={`flex-1 p-3 pr-6 text-gray-700 `}
+            className={`flex-1 p-3 pr-6 `}
             editable={loading ? false : (editable ?? true)}
             placeholderTextColor="#9ca3af"
             style={{ flex: 1, padding: 12, color: "#374151" }}
@@ -166,11 +171,12 @@ export const CurrencyInput = <T extends FieldValues>(props: InputProps<T>) => {
               clearErrors(field.name);
               field.onChange(extracted ? parseFloat(extracted) : "");
             }}
+            maxValue={maxValue}
             onFocus={() => clearErrors(field.name)}
             {...rest}
           />
           <View className="flex-row max-w-12 max-h-11 right-4 items-center">
-            <Text className="text-gray-700">AED</Text>
+            {icon ? icon : <Text className="text-gray-700">AED</Text>}
           </View>
         </View>
       )}

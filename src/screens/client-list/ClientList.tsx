@@ -4,11 +4,11 @@ import { useDebounce } from "@/components/hooks/useDebounce";
 import { IClientSummary } from "@/lib/types/client";
 import { RootNavigationProp } from "@/lib/types/navigation";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
-import { UserRoundPlus, HandCoins, Plus } from "lucide-react-native";
+import { UserRoundPlus, Plus } from "lucide-react-native";
 import { useClientList } from "./useClientList";
 import { useFilterAndSort } from "./useFilterAndSort";
 import { applyFilterAndSort } from "./applyFilterAndSort";
-import { useClientStore } from "@/store/useClientStore";
+import { useRefreshStore } from "@/store/useRefreshStore";
 import ClientListSkeleton from "@/components/skeleton/ClientListSkeleton";
 import ClientSummaryCard from "@/screens/client-list/components/ClientSummaryCard";
 import Utilities from "@/screens/client-list/components/Utilities";
@@ -22,7 +22,9 @@ const ClientList = () => {
   const navigation = useNavigation<RootNavigationProp>();
   const screenFocused = useIsFocused();
 
-  const { shouldRefresh, setShouldRefresh } = useClientStore();
+  const { resetRefresh, refreshMap } = useRefreshStore();
+  const shouldRefresh = refreshMap.clientList;
+
   const { loading, clients, totalBalance, totalOverdue, fetchClients } = useClientList();
   const {
     sortBy,
@@ -46,19 +48,15 @@ const ClientList = () => {
     navigation.push("ClientForm");
   }, []);
 
-  const handleAddCreditPress = useCallback(() => {
-    console.log("creditPress");
-  }, []);
-
   useEffect(() => {
     fetchClients();
   }, []);
 
   useEffect(() => {
-    if (shouldRefresh) {
-      fetchClients();
-      setShouldRefresh(false);
-    }
+    if (!shouldRefresh) return;
+
+    fetchClients();
+    resetRefresh("clientList");
   }, [shouldRefresh]);
 
   const filteredClients = useMemo(() => {
@@ -108,10 +106,7 @@ const ClientList = () => {
 
       <Fab
         visible={screenFocused}
-        actions={[
-          { icon: <HandCoins color="#374151" />, onPress: handleAddCreditPress },
-          { icon: <UserRoundPlus color="#374151" />, onPress: handleAddClientPress },
-        ]}
+        actions={[{ icon: <UserRoundPlus color="#374151" />, onPress: handleAddClientPress }]}
         fabIcon={<Plus size={24} color="white" />}
       />
       <FilterAndSortModal

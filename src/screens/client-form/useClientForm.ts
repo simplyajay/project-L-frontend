@@ -11,8 +11,8 @@ import { useSnackbar } from "@/components/common/Snackbar";
 import { registerClient, updateClient } from "@/api/clients";
 import { useNavigation } from "@react-navigation/native";
 import { RootNavigationProp } from "@/lib/types/navigation";
-import { useClientStore } from "@/store/useClientStore";
 import { Keyboard } from "react-native";
+import { useRefreshStore } from "@/store/useRefreshStore";
 
 interface UseClientForm {
   client?: IClient;
@@ -21,7 +21,7 @@ interface UseClientForm {
 export const useClientForm = ({ client }: UseClientForm) => {
   const defaultValues = getDefaultValues(client);
   const navigation = useNavigation<RootNavigationProp>();
-  const { setShouldRefresh } = useClientStore();
+  const { triggerRefresh } = useRefreshStore();
 
   const { control, handleSubmit, formState, clearErrors, setError, setValue, getValues, reset } =
     useForm<ClientFormType>({
@@ -41,7 +41,7 @@ export const useClientForm = ({ client }: UseClientForm) => {
 
   const validatePhoneInput = (
     phone: PhoneSchemaType,
-    name: Path<ClientFormType>
+    name: Path<ClientFormType>,
   ): IPhone | null => {
     const { countryCode, value } = phone as { countryCode: CountryCode; value: string };
     const phoneNumber = parsePhoneNumberFromString(value, countryCode);
@@ -100,8 +100,6 @@ export const useClientForm = ({ client }: UseClientForm) => {
       otherPhones,
     };
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     const response = client
       ? await updateClient({ id: client._id, data: clientFormData })
       : await registerClient({ data: clientFormData });
@@ -113,7 +111,7 @@ export const useClientForm = ({ client }: UseClientForm) => {
     if (response.ok) {
       reset({});
       showMessage(successMessage);
-      setShouldRefresh(true);
+      triggerRefresh("clientList");
       navigation.goBack();
     } else {
       showMessage(failMessage);
