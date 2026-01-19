@@ -3,7 +3,6 @@ import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { SettlementFormType, SettlementSchema } from "@/lib/schema/settlement";
 import { useForm, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formatDate } from "@/lib/utils/date";
 import {
   CurrencyInput,
   DateInput,
@@ -13,8 +12,9 @@ import {
 import { addSettlement } from "@/api/credits";
 import { useSnackbar } from "@/components/common/Snackbar";
 import { useRefreshStore } from "@/store/useRefreshStore";
-import Picker from "@/components/common/Picker";
 import { CreditType } from "@/lib/types/credit";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import Picker from "@/components/common/Picker";
 
 const LabeledCurrencyInput = withLabel(CurrencyInput<SettlementFormType>);
 const LabeledDateInput = withLabel(DateInput<SettlementFormType>);
@@ -22,18 +22,25 @@ const LabeledDateInput = withLabel(DateInput<SettlementFormType>);
 type FormField = {
   name: Path<SettlementFormType>;
   label: string;
+
+  type: "currency" | "date";
 };
 
-type SettlementFormProps = {
+type AddSettlementFormProps = {
   credit: CreditType;
   currentInterestAmount?: number;
   submitCallback?: () => void;
 };
 
 const settlementFormFields: FormField[] = [
-  { name: "interestAmount", label: "Interest Amount" },
-  { name: "settlementAmount", label: "Settlement Amount" },
-  { name: "settlementDate", label: "Settlement Date" },
+  { name: "interestAmount", label: "Interest Amount", type: "currency" },
+  {
+    name: "settlementAmount",
+    label: "Settlement Amount",
+
+    type: "currency",
+  },
+  { name: "settlementDate", label: "Settlement Date", type: "date" },
 ];
 
 const currentDate = new Date(Date.now());
@@ -42,7 +49,7 @@ const AddSettlementForm = ({
   currentInterestAmount,
   submitCallback,
   credit,
-}: SettlementFormProps) => {
+}: AddSettlementFormProps) => {
   const { control, handleSubmit, clearErrors, setValue } = useForm<SettlementFormType>({
     resolver: zodResolver(SettlementSchema),
     defaultValues: {
@@ -91,7 +98,7 @@ const AddSettlementForm = ({
         <Text className="text-xl font-semibold">Settlement</Text>
       </View>
       <View className="w-full p-6 gap-6 items-center justify-center">
-        {settlementFormFields.map(({ name, label }) => {
+        {settlementFormFields.map(({ name, label, type }) => {
           const commonProps = {
             name,
             control,
@@ -100,7 +107,7 @@ const AddSettlementForm = ({
             className: DEFAULT_FIELD_STYLE,
             clearErrors,
           };
-          return name !== "settlementDate" ? (
+          return type !== "date" ? (
             <LabeledCurrencyInput
               key={name}
               {...commonProps}

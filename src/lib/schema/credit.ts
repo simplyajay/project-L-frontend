@@ -11,8 +11,7 @@ export const AddCreditSchema = z.object({
 });
 
 export const UpdateCreditSchema = z.object({
-  ...AddCreditSchema,
-  dueDate: z.date(),
+  ...AddCreditSchema.shape,
   balance: z
     .number("Amount must be a valid number.")
     .nonnegative("Amount must be greater or equal to 0."),

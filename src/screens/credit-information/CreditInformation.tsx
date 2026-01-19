@@ -15,6 +15,7 @@ import History from "./components/History";
 import Settlements from "./components/Settlements";
 import AddSettlementForm from "./components/AddSettlementForm";
 import CreditInformationSkeleton from "@/components/skeleton/CreditInformationSkeleton";
+import UpdateCreditForm from "./components/UpdateCreditForm";
 
 const CardItem = ({ label, value }: { label: string; value: any }) => {
   return (
@@ -76,14 +77,6 @@ const CreditInformation = () => {
           containerStyle={{ backgroundColor: "#f1f5f9" }}
           title={fullname}
           onBackPress={() => navigation.goBack()}
-          actionComponent={
-            <Pressable
-              className="w-10 p-1 items-center rounded-lg"
-              onPress={() => setModalOptions(() => ({ visible: true, type: "creditForm" }))}
-            >
-              <Edit size={20} />
-            </Pressable>
-          }
         />
         <View className="flex-1 bg-slate-200">
           <View className="p-6 pb-2 gap-6 ">
@@ -91,6 +84,12 @@ const CreditInformation = () => {
               className="items-center p-6 gap-4 rounded-md bg-slate-100"
               style={{ elevation: 5 }}
             >
+              <Pressable
+                className="w-12 p-1 items-center rounded-lg absolute right-0"
+                onPress={() => setModalOptions(() => ({ visible: true, type: "creditForm" }))}
+              >
+                <Edit size={20} />
+              </Pressable>
               <View className="w-full flex-row justify-evenly gap-4">
                 <CardItem label="Credit Date" value={formatDate(new Date(credit.creditDate))} />
                 <CardItem label="Due Date" value={formatDate(new Date(credit.dueDate))} />
@@ -150,9 +149,13 @@ const CreditInformation = () => {
                   credit={credit}
                 />
               ) : (
-                <View>
-                  <Text>Credit Form</Text>
-                </View>
+                <UpdateCreditForm
+                  credit={credit}
+                  submitCallback={() => {
+                    fetchCredit();
+                    hideModal();
+                  }}
+                />
               )}
             </AnimatedPadding>
           </Modal>

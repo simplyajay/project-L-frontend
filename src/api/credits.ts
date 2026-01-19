@@ -5,6 +5,11 @@ import { AxiosRequestConfig } from "axios";
 
 type CreateCreditDTO = Pick<CreditType, "principalAmount" | "creditDate" | "interestRate">;
 
+type UpdateCreditDTO = Pick<
+  CreditType,
+  "principalAmount" | "creditDate" | "interestRate" | "balance"
+> & { updateDate: Date };
+
 type AddSettlementDTO = Pick<
   SettlementType,
   "settlementAmount" | "interestAmount" | "settlementDate"
@@ -28,11 +33,11 @@ type AddSettlementProps = {
 
 type UpdateCreditInformationProps = {
   id: string;
-  data: CreditType;
+  data: UpdateCreditDTO;
   config?: AxiosRequestConfig;
 };
 
-export const addCredit = async <T extends CreditType>({ data, config }: AddCreditProps) => {
+export const addCredit = async <T extends CreateCreditDTO>({ data, config }: AddCreditProps) => {
   return await handleAPIRequest<T>(
     axiosAPI.post<T>(`api/credits/register`, data, { requiresAuth: true, ...config }),
   );
@@ -44,6 +49,16 @@ export const getCredit = async <T extends CreditType>({ id, config = {} }: GetCr
   );
 };
 
+export const updateCredit = async <T extends UpdateCreditDTO>({
+  id,
+  data,
+  config,
+}: UpdateCreditInformationProps): Promise<APIResponse<T>> => {
+  return await handleAPIRequest<T>(
+    axiosAPI.patch<T>(`api/credits/${id}`, data, { requiresAuth: true, ...config }),
+  );
+};
+
 export const addSettlement = async <T extends Omit<SettlementType, "_id">>({
   id,
   data,
@@ -51,15 +66,5 @@ export const addSettlement = async <T extends Omit<SettlementType, "_id">>({
 }: AddSettlementProps): Promise<APIResponse<T>> => {
   return await handleAPIRequest<T>(
     axiosAPI.patch<T>(`api/credits/${id}/new-settlement`, data, { requiresAuth: true, ...config }),
-  );
-};
-
-export const updateCreditInformation = async <T extends CreditType>({
-  id,
-  data,
-  config,
-}: UpdateCreditInformationProps): Promise<APIResponse<T>> => {
-  return await handleAPIRequest<T>(
-    axiosAPI.patch<T>(`api/credits/'${id}'`, data, { requiresAuth: true, ...config }),
   );
 };
