@@ -4,18 +4,19 @@ import { useForm, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddCreditSchema, AddCreditSchemaType } from "@/lib/schema/credit";
 import { Percent } from "lucide-react-native";
-import {
-  CurrencyInput,
-  DateInput,
-  withLabel,
-  DEFAULT_FIELD_STYLE,
-} from "@/components/common/Input";
+import { CurrencyInput, DateInput, withLabel, DEFAULT_FIELD_STYLE } from "@/components/common/Input";
 import { useSnackbar } from "@/components/common/Snackbar";
 import { addCredit } from "@/api/credits";
 import Picker from "@/components/common/Picker";
+import { useAddCreditForm } from "../hooks/useAddCreditForm";
 
 const LabeledCurrencyInput = withLabel(CurrencyInput<AddCreditSchemaType>);
 const LabeledDateInput = withLabel(DateInput<AddCreditSchemaType>);
+
+type AddCreditFormProps = {
+  clientId: string;
+  submitCallback?: () => void;
+};
 
 type FormField = {
   name: Path<AddCreditSchemaType>;
@@ -37,47 +38,26 @@ const formFields: FormField[] = [
   { name: "creditDate", label: "Date" },
 ];
 
-const AddCreditForm = ({
-  submitCallback,
-  clientId,
-}: {
-  submitCallback?: () => void;
-  clientId: string;
-}) => {
-  const { control, handleSubmit, clearErrors, setValue } = useForm<AddCreditSchemaType>({
-    resolver: zodResolver(AddCreditSchema),
-    defaultValues: { creditDate: new Date(Date.now()) },
-    reValidateMode: "onSubmit",
-  });
+const AddCreditForm = ({ submitCallback, clientId }: AddCreditFormProps) => {
+  const { control, loading, creditDate, clearErrors, onDateSelect, onSubmit } = useAddCreditForm({ clientId });
 
   const { showMessage } = useSnackbar();
-  const [loading, setLoading] = useState(false);
   const [pickerVisible, setPickerVisible] = useState(false);
-  const [creditDate, setCreditDate] = useState(new Date(Date.now()));
 
   const handleDateSelect = (date: Date) => {
-    setCreditDate(date);
-    setValue("creditDate", date);
+    onDateSelect(date);
     setPickerVisible(false);
   };
 
-  const onSubmit = async (data: AddCreditSchemaType) => {
-    setLoading(true);
+  const handleAddButtonPress = async () => {
+    const success = await onSubmit();
 
-    const response = await addCredit({ data: { clientId, ...data } });
-
-    if (response.ok) {
+    if (success) {
       if (submitCallback) submitCallback();
-
-      showMessage("Added new credit");
+      showMessage("Added New Credit");
     } else {
-      const { code, message } = response;
-      console.error(code, ": ", message);
-
-      showMessage("Error adding new credit");
+      showMessage("Error Adding New Credit");
     }
-
-    setLoading(false);
   };
 
   return (
@@ -87,8 +67,7 @@ const AddCreditForm = ({
       </View>
       <View className="w-full p-6 gap-6 items-center justify-center ">
         {formFields.map(({ name, label, placeholder }, index) => {
-          const percentIcon =
-            name === "interestRate" ? <Percent size={18} color="#6b7280" /> : undefined;
+          const percentIcon = name === "interestRate" ? <Percent size={18} color="#6b7280" /> : undefined;
           const commonProps = {
             control,
             name,
@@ -99,11 +78,7 @@ const AddCreditForm = ({
             className: DEFAULT_FIELD_STYLE,
           };
           return name === "creditDate" ? (
-            <LabeledDateInput
-              key={index}
-              {...commonProps}
-              onFieldPress={() => setPickerVisible(true)}
-            />
+            <LabeledDateInput key={index} {...commonProps} onFieldPress={() => setPickerVisible(true)} />
           ) : (
             <LabeledCurrencyInput
               key={index}
@@ -117,7 +92,7 @@ const AddCreditForm = ({
         <Pressable
           className="w-full p-4 items-center justify-center  bg-[#303030] rounded-lg"
           disabled={loading}
-          onPress={handleSubmit(onSubmit)}
+          onPress={handleAddButtonPress}
         >
           {loading ? (
             <ActivityIndicator size="small" color="#adadad" />

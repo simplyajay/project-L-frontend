@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, Pressable, RefreshControl } from "react-native";
-import { ICreditSnapshot } from "@/lib/types/credit";
+import { CreditSnapshotType } from "@/lib/types/credit";
 import { formatNumber } from "@/lib/utils/number";
 import { formatDate } from "@/lib/utils/date";
 import { useNavigation } from "@react-navigation/native";
 import { RootNavigationProp } from "@/lib/types/navigation";
-import { IClient } from "@/lib/types/client";
+import { ClientType } from "@/lib/types/client";
+import { useAuthenticatedUserStore } from "@/store/useAuthenticatedUserStore";
 
 type TransactionsProps = {
-  client: IClient;
-  credits: ICreditSnapshot[];
+  client: ClientType;
+  credits: CreditSnapshotType[];
   refreshControl: {
     handleRefresh: () => void;
     loading: boolean;
@@ -22,9 +23,13 @@ const Transactions = ({ client, credits, refreshControl }: TransactionsProps) =>
 
   const { loading, handleRefresh } = refreshControl;
 
-  const handleCardPress = (credit: ICreditSnapshot) => {
+  const handleCardPress = (credit: CreditSnapshotType) => {
     navigation.navigate("CreditInformation", { client, creditId: credit._id });
   };
+
+  const { user } = useAuthenticatedUserStore();
+
+  const currency = user?.preference.preferredCurrency;
 
   return (
     <FlatList
@@ -53,19 +58,19 @@ const Transactions = ({ client, credits, refreshControl }: TransactionsProps) =>
           <View className="w-full flex-row items-center justify-between p-2">
             <View>
               <Text className="text-sm text-gray-500">Principal</Text>
-              <Text>{`AED ${formatNumber(item.principalAmount)}`}</Text>
+              <Text>{`${currency} ${formatNumber(item.principalAmount)}`}</Text>
             </View>
 
             <View className="items-end">
               <Text className="text-sm text-gray-500">Balance</Text>
-              <Text>{`AED ${formatNumber(item.balance)}`}</Text>
+              <Text>{`${currency} ${formatNumber(item.balance)}`}</Text>
             </View>
           </View>
         </Pressable>
       )}
       ListEmptyComponent={
-        <View className="flex-1">
-          <Text>This client has no transactions</Text>
+        <View className="flex-1 items-center top-32">
+          <Text className="text-lg text-gray-500 font-semibold">This client has no transactions.</Text>
         </View>
       }
     />
