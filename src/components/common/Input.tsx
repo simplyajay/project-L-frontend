@@ -79,9 +79,7 @@ const InputWrapper = <T extends FieldValues>({ name, control, children }: InputW
   );
 };
 
-export const TextInput = <T extends FieldValues>(
-  props: InputProps<T> & { inputIcon?: InputIcon }
-) => {
+export const TextInput = <T extends FieldValues>(props: InputProps<T> & { inputIcon?: InputIcon }) => {
   const {
     name,
     control,
@@ -101,9 +99,7 @@ export const TextInput = <T extends FieldValues>(
     <InputWrapper name={name} control={control}>
       {({ field, fieldError }) => {
         return (
-          <View
-            className={`${INNER_FIELD_STYLE} ${fieldError ? "border-red-400" : "border-slate-300"} ${className}`}
-          >
+          <View className={`${INNER_FIELD_STYLE} ${fieldError ? "border-red-400" : "border-slate-300"} ${className}`}>
             <RNTextInput
               keyboardType={keyboardType}
               secureTextEntry={secureTextEntry}
@@ -111,7 +107,7 @@ export const TextInput = <T extends FieldValues>(
               editable={loading ? false : (editable ?? true)}
               className={`flex-1 ${inputIcon ? "p-3 pr-6" : "p-3"} text-gray-700 `}
               placeholder={placeholder}
-              autoCapitalize="none"
+              autoCapitalize="words"
               onChangeText={(text) => {
                 clearErrors(field.name);
                 field.onChange(text);
@@ -136,27 +132,14 @@ export const TextInput = <T extends FieldValues>(
 };
 
 export const CurrencyInput = <T extends FieldValues>(
-  props: InputProps<T> & { icon?: ReactNode; maxValue?: number }
+  props: InputProps<T> & { icon?: ReactNode; maxValue?: number },
 ) => {
-  const {
-    name,
-    control,
-    loading,
-    editable,
-    placeholder,
-    clearErrors,
-    className,
-    onLayout,
-    icon,
-    maxValue,
-    ...rest
-  } = props;
+  const { name, control, loading, editable, placeholder, clearErrors, className, onLayout, icon, maxValue, ...rest } =
+    props;
   return (
     <InputWrapper name={name} control={control}>
       {({ field, fieldError }) => (
-        <View
-          className={`${INNER_FIELD_STYLE} ${fieldError ? "border-red-400" : "border-slate-300"} ${className}`}
-        >
+        <View className={`${INNER_FIELD_STYLE} ${fieldError ? "border-red-400" : "border-slate-300"} ${className}`}>
           <MoneyTextInput
             value={field.value?.toString() ?? ""}
             fractionSeparator="."
@@ -184,9 +167,7 @@ export const CurrencyInput = <T extends FieldValues>(
   );
 };
 
-export const DateInput = <T extends FieldValues>(
-  props: InputProps<T> & { onFieldPress?: () => void }
-) => {
+export const DateInput = <T extends FieldValues>(props: InputProps<T> & { onFieldPress?: () => void }) => {
   const {
     name,
     control,
@@ -232,7 +213,7 @@ export const DateInput = <T extends FieldValues>(
 };
 
 export const PhoneInput = <T extends FieldValues>(
-  props: InputProps<T> & { onButtonPress: (name: Path<T>) => void }
+  props: InputProps<T> & { onCountryChange: (name: Path<T>) => void; country: CountryCode },
 ) => {
   const {
     name,
@@ -242,27 +223,26 @@ export const PhoneInput = <T extends FieldValues>(
     placeholder,
     clearErrors,
     className,
-    onButtonPress,
+    onCountryChange,
     onLayout,
+    country,
     ...rest
   } = props;
 
   return (
     <InputWrapper name={name} control={control}>
       {({ field: { name, onChange, value }, fieldError }) => {
-        const val = value || { value: "", countryCode: "AE" as CountryCode };
+        const phone = value as { country_code: CountryCode; value: string };
 
         return (
-          <View
-            className={`${INNER_FIELD_STYLE} ${fieldError ? "border-red-400" : "border-slate-300"} ${className}`}
-          >
+          <View className={`${INNER_FIELD_STYLE} ${fieldError ? "border-red-400" : "border-slate-300"} ${className}`}>
             <Pressable
               className="flex-row items-center justify-center px-3 gap-2 border-r border-gray-300"
-              onPress={() => (onButtonPress ? onButtonPress(name) : undefined)}
+              onPress={() => (onCountryChange ? onCountryChange(name) : undefined)}
             >
               <View className="flex-row gap-2 items-center">
-                <Text className="">{getFlagEmoji(val.countryCode)}</Text>
-                <Text className="text-gray-700">{`+${getCountryCallingCode(val.countryCode)}`}</Text>
+                <Text className="">{getFlagEmoji(phone.country_code)}</Text>
+                <Text className="text-gray-700">{`+${getCountryCallingCode(phone.country_code)}`}</Text>
               </View>
 
               <ChevronDown size={15} color="#9ca3af" />
@@ -277,10 +257,10 @@ export const PhoneInput = <T extends FieldValues>(
               autoCapitalize="none"
               onChangeText={(text) => {
                 clearErrors(name);
-                onChange({ ...val, value: text });
+                onChange({ ...phone, value: text });
               }}
               onFocus={() => clearErrors(name)}
-              value={val.value}
+              value={phone.value}
               {...rest}
             />
           </View>

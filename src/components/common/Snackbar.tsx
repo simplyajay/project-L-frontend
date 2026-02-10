@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import { Snackbar, Text } from "react-native-paper";
 interface ISnackbarContext {
   showMessage: (message: string, duration?: number) => void;
@@ -8,16 +8,18 @@ export const SnackbarProvider = ({ children }: { children: ReactNode }) => {
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState("");
   const [duration, setDuration] = useState(3000);
-  const showMessage = (msg: string, dur?: number) => {
+  const showMessage = useCallback((msg: string, dur?: number) => {
     setMessage(msg);
     setDuration(dur ?? 3000);
     setVisible(true);
-  };
+  }, []);
 
   return (
     <SnackbarContext.Provider value={{ showMessage }}>
       {children}
+
       <Snackbar
+        key="global-snackbar"
         visible={visible}
         onDismiss={() => setVisible(false)}
         duration={duration}

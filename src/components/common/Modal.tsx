@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, PropsWithChildren, ReactNode } from "react";
+import React, { useState, useEffect, useRef, ReactNode } from "react";
 import {
   View,
   Pressable,
@@ -10,12 +10,7 @@ import {
   Keyboard,
   Animated as RNAnimated,
 } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  runOnJS,
-} from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from "react-native-reanimated";
 import { Portal } from "react-native-paper";
 
 type ModalProps = {
@@ -23,12 +18,18 @@ type ModalProps = {
   onBackdropPress?: () => void;
   onBackButtonPress?: () => void;
   onCloseCallback?: () => void;
-  animationInTiming?: number | 100;
-  animationOutTiming?: number | 100;
+  animationInTiming?: number;
+  animationOutTiming?: number;
   children: React.ReactNode;
+  animationType?: "slide" | "fade";
   containerStyle?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
   isCentered?: boolean;
+};
+
+type AnimatedPaddingProps = {
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
 };
 
 const Modal = (props: ModalProps) => {
@@ -38,8 +39,9 @@ const Modal = (props: ModalProps) => {
     onBackdropPress,
     onCloseCallback,
     children,
-    animationInTiming,
-    animationOutTiming,
+    animationType = "slide",
+    animationInTiming = 100,
+    animationOutTiming = 100,
     containerStyle,
     contentStyle,
     isCentered,
@@ -50,12 +52,20 @@ const Modal = (props: ModalProps) => {
   const SCREEN_HEIGHT = Dimensions.get("screen").height;
   const backdropOpacity = useSharedValue(0);
   const translateY = useSharedValue(isCentered ? -50 : SCREEN_HEIGHT);
+  const modalOpacity = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
       setShow(true);
       backdropOpacity.value = withTiming(1, { duration: animationInTiming });
-      translateY.value = withTiming(0, { duration: animationInTiming });
+
+      if (animationType === "fade") {
+        modalOpacity.value = withTiming(1, { duration: animationInTiming });
+        translateY.value = 0;
+      } else {
+        modalOpacity.value = 1;
+        translateY.value = withTiming(0, { duration: animationInTiming });
+      }
 
       const backAction = () => {
         onBackButtonPress?.();
@@ -66,15 +76,20 @@ const Modal = (props: ModalProps) => {
       return () => subscription.remove();
     } else {
       backdropOpacity.value = withTiming(0, { duration: animationOutTiming });
-      translateY.value = withTiming(SCREEN_HEIGHT, { duration: animationOutTiming }, () => {
-        runOnJS(setShow)(false);
 
-        if (show) {
-          if (onCloseCallback) {
-            if (onCloseCallback) runOnJS(onCloseCallback)();
-          }
-        }
-      });
+      if (animationType == "fade") {
+        modalOpacity.value = withTiming(0, { duration: animationOutTiming, easing: Easing.linear }, () => {
+          runOnJS(setShow)(false);
+
+          if (show && onCloseCallback) runOnJS(onCloseCallback)();
+        });
+      } else {
+        translateY.value = withTiming(SCREEN_HEIGHT, { duration: animationOutTiming }, () => {
+          runOnJS(setShow)(false);
+
+          if (show && onCloseCallback) runOnJS(onCloseCallback)();
+        });
+      }
     }
   }, [visible, animationInTiming, animationOutTiming, onBackButtonPress]);
 
@@ -83,6 +98,7 @@ const Modal = (props: ModalProps) => {
   }));
 
   const modalStyle = useAnimatedStyle(() => ({
+    opacity: modalOpacity.value,
     transform: [{ translateY: translateY.value }],
   }));
 
@@ -92,12 +108,10 @@ const Modal = (props: ModalProps) => {
     <Portal>
       <View style={isCentered ? styles.centeredContainer : (containerStyle ?? styles.container)}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onBackdropPress}>
-          <Animated.View
-            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.5)" }, backdropStyle]}
-          />
+          <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.5)" }, backdropStyle]} />
         </Pressable>
         <Animated.View
-          style={[isCentered ? styles.centeredModal : styles.modal, contentStyle, modalStyle]}
+          style={[isCentered ? [styles.centeredModal, contentStyle] : styles.modal, contentStyle, modalStyle]}
         >
           {children}
         </Animated.View>
@@ -126,15 +140,13 @@ const styles = StyleSheet.create({
   },
   centeredModal: {
     width: "80%",
-    borderRadius: 20,
     backgroundColor: "#fff",
-    padding: 20,
     alignItems: "center",
   },
 });
 
 /** Form that will be wrapped with Modal */
-export const AnimatedPadding = ({ children }: { children: ReactNode }) => {
+export const AnimatedPadding = ({ children, style }: AnimatedPaddingProps) => {
   const animatedPadding = useRef(new RNAnimated.Value(0)).current;
 
   useEffect(() => {
@@ -163,10 +175,19 @@ export const AnimatedPadding = ({ children }: { children: ReactNode }) => {
   const animatedStyle = { paddingBottom: animatedPadding };
 
   return (
-    <RNAnimated.View className="w-full bg-slate-200 rounded-t-lg" style={animatedStyle}>
+    <RNAnimated.View className="w-full bg-slate-200" style={[animatedStyle, style]}>
       {children}
     </RNAnimated.View>
   );
+};
+
+export const DEFAULT_ANIMATED_PADDING_STYLE_SLIDE: StyleProp<ViewStyle> = {
+  borderTopLeftRadius: 10,
+  borderTopRightRadius: 10,
+};
+
+export const DEFAULT_ANIMATED_PADDING_STYLE_FADE: StyleProp<ViewStyle> = {
+  borderRadius: 10,
 };
 
 export default Modal;
