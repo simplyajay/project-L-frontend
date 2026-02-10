@@ -5,66 +5,71 @@ import { AxiosRequestConfig } from "axios";
 
 type CreateCreditDTO = Pick<CreditType, "principalAmount" | "creditDate" | "interestRate">;
 
-type UpdateCreditDTO = Pick<
-  CreditType,
-  "principalAmount" | "creditDate" | "interestRate" | "balance"
-> & { updateDate: Date };
+type UpdateCreditDTO = Pick<CreditType, "principalAmount" | "creditDate" | "interestRate" | "balance"> & {
+  updateDate: Date;
+};
 
-type AddSettlementDTO = Pick<
-  SettlementType,
-  "settlementAmount" | "interestAmount" | "settlementDate"
->;
+type AddSettlementDTO = Pick<SettlementType, "settlementAmount" | "interestAmount" | "settlementDate">;
 
 type AddCreditProps = {
-  data: CreateCreditDTO & { clientId: string };
+  clientId: string;
+  data: CreateCreditDTO;
   config?: AxiosRequestConfig;
 };
 
 type GetCreditProps = {
-  id: string;
+  clientId: string;
+  creditId: string;
   config?: AxiosRequestConfig;
 };
 
 type AddSettlementProps = {
-  id: string;
+  clientId: string;
+  creditId: string;
   data: AddSettlementDTO;
   config?: AxiosRequestConfig;
 };
 
 type UpdateCreditInformationProps = {
-  id: string;
+  clientId: string;
+  creditId: string;
   data: UpdateCreditDTO;
   config?: AxiosRequestConfig;
 };
 
-export const addCredit = async <T extends CreateCreditDTO>({ data, config }: AddCreditProps) => {
+export const addCredit = async <T extends CreateCreditDTO>({ clientId, data, config }: AddCreditProps) => {
   return await handleAPIRequest<T>(
-    axiosAPI.post<T>(`api/credits/register`, data, { requiresAuth: true, ...config }),
+    axiosAPI.post<T>(`api/me/clients/${clientId}/credits`, data, { requiresAuth: true, ...config }),
   );
 };
 
-export const getCredit = async <T extends CreditType>({ id, config = {} }: GetCreditProps) => {
+export const getCredit = async <T extends CreditType>({ clientId, creditId, config = {} }: GetCreditProps) => {
   return await handleAPIRequest<T>(
-    axiosAPI.get<T>(`api/credits/${id}`, { requiresAuth: true, ...config }),
+    axiosAPI.get<T>(`api/me/clients/${clientId}/credits/${creditId}`, { requiresAuth: true, ...config }),
   );
 };
 
 export const updateCredit = async <T extends UpdateCreditDTO>({
-  id,
+  clientId,
+  creditId,
   data,
   config,
 }: UpdateCreditInformationProps): Promise<APIResponse<T>> => {
   return await handleAPIRequest<T>(
-    axiosAPI.patch<T>(`api/credits/${id}`, data, { requiresAuth: true, ...config }),
+    axiosAPI.patch<T>(`api/me/clients/${clientId}/credits/${creditId}`, data, { requiresAuth: true, ...config }),
   );
 };
 
 export const addSettlement = async <T extends Omit<SettlementType, "_id">>({
-  id,
+  clientId,
+  creditId,
   data,
   config,
 }: AddSettlementProps): Promise<APIResponse<T>> => {
   return await handleAPIRequest<T>(
-    axiosAPI.patch<T>(`api/credits/${id}/new-settlement`, data, { requiresAuth: true, ...config }),
+    axiosAPI.patch<T>(`api/me/clients/${clientId}/credits/${creditId}/settlements`, data, {
+      requiresAuth: true,
+      ...config,
+    }),
   );
 };

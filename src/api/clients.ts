@@ -1,67 +1,59 @@
 import axiosAPI from "@/lib/axios/axios";
 import { APIResponse, handleAPIRequest } from "@/lib/services/api.service";
-import { IClient, IClientSummary } from "@/lib/types/client";
-import { AxiosRequestConfig } from "axios";
-import { ClientFormData } from "@/lib/schema/client";
+import { ClientType, ClientSummaryType } from "@/lib/types/client";
+import axios, { AxiosRequestConfig } from "axios";
 import { CreditType } from "@/lib/types/credit";
+import { ClientFormType, DeleteClientFormType } from "@/lib/schema/client";
 
 export type GetSummarizedClients = {
-  summarizedClients: IClientSummary[];
+  clients: ClientSummaryType[];
   totalOverdueAll: number;
   totalBalanceAll: number;
 };
 
-interface GetClientProps {
+type GetClientProps = {
   id: string;
   config?: AxiosRequestConfig;
-}
+};
 
-interface ClientFormProps {
-  data: ClientFormData;
+type ClientFormProps = {
+  data: ClientFormType;
   config?: AxiosRequestConfig;
-}
+};
+
+type DeleteClientProps = {
+  id: string;
+  data: DeleteClientFormType;
+  config?: AxiosRequestConfig;
+};
 
 export const getSummarizedClients = async <T = GetSummarizedClients>(
   config: AxiosRequestConfig = {},
 ): Promise<APIResponse<T>> => {
-  return await handleAPIRequest<T>(
-    axiosAPI.get<T>("api/users/me/clients", { requiresAuth: true, ...config }),
-  );
+  return await handleAPIRequest<T>(axiosAPI.get<T>("api/me/clients", { requiresAuth: true, ...config }));
 };
 
-export const getClient = async <T = IClient>({
-  id,
-  config = {},
-}: GetClientProps): Promise<APIResponse<T>> => {
-  return await handleAPIRequest<T>(
-    axiosAPI.get<T>(`api/clients/${id}`, { requiresAuth: true, ...config }),
-  );
+export const getClient = async <T = ClientType>({ id, config = {} }: GetClientProps): Promise<APIResponse<T>> => {
+  return await handleAPIRequest<T>(axiosAPI.get<T>(`api/me/clients/${id}`, { requiresAuth: true, ...config }));
 };
 
-export const getClientCredits = async <T = CreditType[]>({
-  id,
-  config,
-}: GetClientProps): Promise<APIResponse<T>> => {
-  return await handleAPIRequest<T>(
-    axiosAPI.get<T>(`api/clients/${id}/credit-snapshots`, { requiresAuth: true, ...config }),
-  );
+export const getClientCredits = async <T = CreditType[]>({ id, config }: GetClientProps): Promise<APIResponse<T>> => {
+  return await handleAPIRequest<T>(axiosAPI.get<T>(`api/me/clients/${id}/credits`, { requiresAuth: true, ...config }));
 };
 
-export const registerClient = async <T = ClientFormData>({
+export const registerClient = async <T = ClientFormType>({
   data,
   config = {},
 }: ClientFormProps): Promise<APIResponse<T>> => {
-  return await handleAPIRequest<T>(
-    axiosAPI.post<T>("api/clients/register", data, { requiresAuth: true, ...config }),
-  );
+  return await handleAPIRequest<T>(axiosAPI.post<T>("api/me/clients/", data, { requiresAuth: true, ...config }));
 };
 
-export const updateClient = async <T = ClientFormData>({
-  id,
-  data,
-  config = {},
-}: ClientFormProps & { id: string }) => {
+export const updateClient = async <T = ClientFormType>({ id, data, config = {} }: ClientFormProps & { id: string }) => {
+  return await handleAPIRequest<T>(axiosAPI.patch<T>(`api/me/clients/${id}`, data, { requiresAuth: true, ...config }));
+};
+
+export const deleteClient = async <T = DeleteClientFormType>({ id, data, config }: DeleteClientProps) => {
   return await handleAPIRequest<T>(
-    axiosAPI.patch<T>(`api/clients/${id}`, data, { requiresAuth: true, ...config }),
+    axiosAPI.post<T>(`api/me/clients/${id}/delete`, data, { requiresAuth: true, ...config }),
   );
 };
